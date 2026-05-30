@@ -4,8 +4,8 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
-env/
-venv/
+**/venv/
+**/env/
 .venv/
 *.egg-info/
 dist/
@@ -13,15 +13,16 @@ build/
 *.egg
 .pytest_cache/
 
-# Model artifacts
-models/*.pth
-models/*.pt
-models/*.onnx
-models/*.enc
+# Hardened Model Exclusions (Ignore all files under models/ except registry.py)
+models/**
+!models/
+!models/registry.py
 
 # Datasets (large binary files)
 datasets/raw/
 datasets/processed/
+datasets/**/*.zip
+datasets/**/*.tar.gz
 
 # Logs
 logs/*.log
@@ -32,6 +33,7 @@ logs/*.jsonl
 .env.local
 .env.production
 .env.development
+.env.staging
 
 # Node / Next.js
 frontend/node_modules/
