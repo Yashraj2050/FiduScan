@@ -1,0 +1,101 @@
+{
+  "model": "resnet50",
+  "status": "completed",
+  "n_samples": 8,
+  "n_correct": 8,
+  "n_suspicious_activations": 6,
+  "activation_consistency_mean": 0.1053,
+  "accuracy_on_samples": 1.0,
+  "heatmaps": [
+    {
+      "sample_idx": 452,
+      "true_label": 0,
+      "predicted_prob_ai": 0.029,
+      "predicted_class": "AUTHENTIC",
+      "correct": true,
+      "cam_mean": 0.0,
+      "cam_max": 0.0,
+      "suspicious_activation": true,
+      "heatmap_path": "/Users/yashrajdnyaneshwarkuyate/FiduScan/reports/explainability/resnet50/gradcam_resnet50_00_lbl0.jpg"
+    },
+    {
+      "sample_idx": 385,
+      "true_label": 0,
+      "predicted_prob_ai": 0.0286,
+      "predicted_class": "AUTHENTIC",
+      "correct": true,
+      "cam_mean": 0.0,
+      "cam_max": 0.0,
+      "suspicious_activation": true,
+      "heatmap_path": "/Users/yashrajdnyaneshwarkuyate/FiduScan/reports/explainability/resnet50/gradcam_resnet50_01_lbl0.jpg"
+    },
+    {
+      "sample_idx": 1144,
+      "true_label": 0,
+      "predicted_prob_ai": 0.0282,
+      "predicted_class": "AUTHENTIC",
+      "correct": true,
+      "cam_mean": 0.0,
+      "cam_max": 0.0,
+      "suspicious_activation": true,
+      "heatmap_path": "/Users/yashrajdnyaneshwarkuyate/FiduScan/reports/explainability/resnet50/gradcam_resnet50_02_lbl0.jpg"
+    },
+    {
+      "sample_idx": 1076,
+      "true_label": 1,
+      "predicted_prob_ai": 0.9726,
+      "predicted_class": "AI_GENERATED",
+      "correct": true,
+      "cam_mean": 0.3751,
+      "cam_max": 1.0,
+      "suspicious_activation": false,
+      "heatmap_path": "/Users/yashrajdnyaneshwarkuyate/FiduScan/reports/explainability/resnet50/gradcam_resnet50_03_lbl1.jpg"
+    },
+    {
+      "sample_idx": 1089,
+      "true_label": 0,
+      "predicted_prob_ai": 0.0287,
+      "predicted_class": "AUTHENTIC",
+      "correct": true,
+      "cam_mean": 0.0,
+      "cam_max": 0.0,
+      "suspicious_activation": true,
+      "heatmap_path": "/Users/yashrajdnyaneshwarkuyate/FiduScan/reports/explainability/resnet50/gradcam_resnet50_04_lbl0.jpg"
+    },
+    {
+      "sample_idx": 1128,
+      "true_label": 1,
+      "predicted_prob_ai": 0.9759,
+      "predicted_class": "AI_GENERATED",
+      "correct": true,
+      "cam_mean": 0.4672,
+      "cam_max": 1.0,
+      "suspicious_activation": false,
+      "heatmap_path": "/Users/yashrajdnyaneshwarkuyate/FiduScan/reports/explainability/resnet50/gradcam_resnet50_05_lbl1.jpg"
+    },
+    {
+      "sample_idx": 233,
+      "true_label": 0,
+      "predicted_prob_ai": 0.0284,
+      "predicted_class": "AUTHENTIC",
+      "correct": true,
+      "cam_mean": 0.0,
+      "cam_max": 0.0,
+      "suspicious_activation": true,
+      "heatmap_path": "/Users/yashrajdnyaneshwarkuyate/FiduScan/reports/explainability/resnet50/gradcam_resnet50_06_lbl0.jpg"
+    },
+    {
+      "sample_idx": 854,
+      "true_label": 0,
+      "predicted_prob_ai": 0.0289,
+      "predicted_class": "AUTHENTIC",
+      "correct": true,
+      "cam_mean": 0.0,
+      "cam_max": 0.0,
+      "suspicious_activation": true,
+      "heatmap_path": "/Users/yashrajdnyaneshwarkuyate/FiduScan/reports/explainability/resnet50/gradcam_resnet50_07_lbl0.jpg"
+    }
+  ],
+  "output_dir": "/Users/yashrajdnyaneshwarkuyate/FiduScan/reports/explainability/resnet50",
+  "preliminary": false
+}

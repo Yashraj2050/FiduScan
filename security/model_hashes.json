@@ -1,0 +1,19 @@
+[
+  {
+    "id": "efficientnet_b0-1780002985",
+    "architecture": "efficientnet_b0",
+    "path": "/Users/yashrajdnyaneshwarkuyate/FiduScan/models/efficientnet_b0_fiduscan.pth",
+    "sha256": "692fd9c4c8f88d3a1ed6fa77a823cc11075e449e3e4d7198868953b33c37c49e",
+    "registered_at": "2026-05-28T21:16:25Z",
+    "metrics": {
+      "loss": 0.127086,
+      "accuracy": 1.0,
+      "f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "roc_auc": 1.0
+    },
+    "encrypted_path": "/Users/yashrajdnyaneshwarkuyate/FiduScan/models/encrypted/efficientnet_b0_fiduscan.enc",
+    "status": "validated"
+  }
+]

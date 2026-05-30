@@ -1,0 +1,51 @@
+# Training Configuration — FiduScan Phase 1
+# EfficientNet-B0 Binary Classifier: Authentic (0) vs AI-Generated (1)
+
+model:
+  architecture: "efficientnet_b0"   # Options: efficientnet_b0 | resnet50 | vit_b16
+  num_classes: 2
+  pretrained: true
+
+training:
+  epochs: 10
+  batch_size: 32
+  image_size: 224
+  optimizer: "adamw"
+  learning_rate: 2.0e-4
+  weight_decay: 1.0e-4
+  scheduler: "cosine"               # cosine annealing LR scheduler
+  warmup_epochs: 1
+  loss_function: "cross_entropy"
+  label_smoothing: 0.05             # Helps prevent overconfidence
+  early_stopping_patience: 3       # Stop if val_f1 doesn't improve for N epochs
+
+  # Device priority: mps → cuda → cpu
+  device: "auto"
+
+data:
+  dataset_path: "datasets/raw"
+  train_ratio: 0.70
+  val_ratio: 0.15
+  test_ratio: 0.15
+  num_workers: 4
+  pin_memory: true
+
+checkpointing:
+  save_dir: "models"
+  save_every_n_epochs: 2
+  save_best: true
+  metric: "val_f1"                  # Best model saved by F1 score
+
+logging:
+  log_dir: "logs"
+  log_file: "training.log"
+  log_every_n_steps: 10
+  tensorboard: false                # Set true to enable TensorBoard logging
+
+security:
+  hash_artifacts: true              # SHA-256 hash all saved .pth files
+  encrypt_artifacts: false          # Enable for production deployment
+
+evaluation:
+  compute_grad_cam: false           # Grad-CAM on test samples (slow)
+  adversarial_eval: false           # Phase 2: FGSM robustness evaluation

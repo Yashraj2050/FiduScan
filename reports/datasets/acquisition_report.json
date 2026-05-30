@@ -1,0 +1,18 @@
+{
+  "timestamp": "2026-05-28T21:08:40Z",
+  "mode": "synthetic",
+  "result": {
+    "real": 500,
+    "fake": 500,
+    "source": "synthetic"
+  },
+  "real_dir": "/Users/yashrajdnyaneshwarkuyate/FiduScan/datasets/raw/real",
+  "fake_dir": "/Users/yashrajdnyaneshwarkuyate/FiduScan/datasets/raw/fake",
+  "kaggle_instructions": {
+    "step1": "Go to https://www.kaggle.com/settings \u2192 API \u2192 Create New Token",
+    "step2": "Save kaggle.json to ~/.kaggle/kaggle.json",
+    "step3": "chmod 600 ~/.kaggle/kaggle.json",
+    "step4": "python datasets/acquire.py --mode kaggle",
+    "dataset_url": "https://www.kaggle.com/datasets/birdy654/cifake-real-and-ai-generated-synthetic-images"
+  }
+}

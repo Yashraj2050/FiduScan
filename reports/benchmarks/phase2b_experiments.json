@@ -1,0 +1,238 @@
+{
+  "A": {
+    "experiment": "A",
+    "arch": "efficientnet_b0",
+    "epochs_completed": 4,
+    "training_time_sec": 320.7,
+    "train_log": [
+      {
+        "epoch": 1,
+        "train_loss": 0.122934,
+        "val_f1": 1.0,
+        "val_acc": 1.0,
+        "val_auc": 1.0
+      },
+      {
+        "epoch": 2,
+        "train_loss": 0.117882,
+        "val_f1": 1.0,
+        "val_acc": 1.0,
+        "val_auc": 1.0
+      },
+      {
+        "epoch": 3,
+        "train_loss": 0.117486,
+        "val_f1": 1.0,
+        "val_acc": 1.0,
+        "val_auc": 1.0
+      },
+      {
+        "epoch": 4,
+        "train_loss": 0.117416,
+        "val_f1": 1.0,
+        "val_acc": 1.0,
+        "val_auc": 1.0
+      }
+    ],
+    "test_metrics": {
+      "loss": 0.117045,
+      "accuracy": 1.0,
+      "f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "roc_auc": 1.0,
+      "fpr": 0.0,
+      "fnr": 0.0,
+      "confusion_matrix": [
+        [
+          121,
+          0
+        ],
+        [
+          0,
+          359
+        ]
+      ]
+    },
+    "model_path": "/Users/yashrajdnyaneshwarkuyate/FiduScan/models/phase2b/exp_a.pth",
+    "artifact_sha256": "a9529745c222615bab99c80c495c59b869b226209298b16dbde1c56ad0518a9b",
+    "description": "EfficientNet-B0 baseline (Phase 2A weights + standard augmentation)"
+  },
+  "B": {
+    "experiment": "B",
+    "arch": "efficientnet_b0",
+    "epochs_completed": 4,
+    "training_time_sec": 458.5,
+    "train_log": [
+      {
+        "epoch": 1,
+        "train_loss": 0.124972,
+        "val_f1": 1.0,
+        "val_acc": 1.0,
+        "val_auc": 1.0
+      },
+      {
+        "epoch": 2,
+        "train_loss": 0.119106,
+        "val_f1": 1.0,
+        "val_acc": 1.0,
+        "val_auc": 1.0
+      },
+      {
+        "epoch": 3,
+        "train_loss": 0.117755,
+        "val_f1": 1.0,
+        "val_acc": 1.0,
+        "val_auc": 1.0
+      },
+      {
+        "epoch": 4,
+        "train_loss": 0.11783,
+        "val_f1": 1.0,
+        "val_acc": 1.0,
+        "val_auc": 1.0
+      }
+    ],
+    "test_metrics": {
+      "loss": 0.119304,
+      "accuracy": 0.997917,
+      "f1": 0.998639,
+      "precision": 0.997283,
+      "recall": 1.0,
+      "roc_auc": 1.0,
+      "fpr": 0.00885,
+      "fnr": 0.0,
+      "confusion_matrix": [
+        [
+          112,
+          1
+        ],
+        [
+          0,
+          367
+        ]
+      ]
+    },
+    "model_path": "/Users/yashrajdnyaneshwarkuyate/FiduScan/models/phase2b/exp_b.pth",
+    "artifact_sha256": "98a7bcc629115c6e1d9418db82a24bf846e94acc38c282372aaccdcf1bade838",
+    "description": "EfficientNet-B0 + strong augmentation (RandRotate30, ColorJitter0.5, RandomErasing, GaussianBlur)"
+  },
+  "C": {
+    "experiment": "C",
+    "arch": "efficientnet_b0",
+    "epochs_completed": 4,
+    "training_time_sec": 650.1,
+    "train_log": [
+      {
+        "epoch": 1,
+        "train_loss": 0.12376,
+        "val_f1": 1.0,
+        "val_acc": 1.0,
+        "val_auc": 1.0
+      },
+      {
+        "epoch": 2,
+        "train_loss": 0.118048,
+        "val_f1": 1.0,
+        "val_acc": 1.0,
+        "val_auc": 1.0
+      },
+      {
+        "epoch": 3,
+        "train_loss": 0.117579,
+        "val_f1": 1.0,
+        "val_acc": 1.0,
+        "val_auc": 1.0
+      },
+      {
+        "epoch": 4,
+        "train_loss": 0.118288,
+        "val_f1": 1.0,
+        "val_acc": 1.0,
+        "val_auc": 1.0
+      }
+    ],
+    "test_metrics": {
+      "loss": 0.13041,
+      "accuracy": 1.0,
+      "f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "roc_auc": 1.0,
+      "fpr": 0.0,
+      "fnr": 0.0,
+      "confusion_matrix": [
+        [
+          121,
+          0
+        ],
+        [
+          0,
+          359
+        ]
+      ]
+    },
+    "model_path": "/Users/yashrajdnyaneshwarkuyate/FiduScan/models/phase2b/exp_c.pth",
+    "artifact_sha256": "194332221c3beb1c3a5d718dabf0f065c1d59b263101f4fd555641b2b2599862",
+    "description": "EfficientNet-B0 baseline + 3-epoch GAN-hard fine-tuning (lr=5e-5)"
+  },
+  "D": {
+    "experiment": "D",
+    "arch": "resnet50",
+    "epochs_completed": 4,
+    "training_time_sec": 782.2,
+    "train_log": [
+      {
+        "epoch": 1,
+        "train_loss": 0.1306,
+        "val_f1": 1.0,
+        "val_acc": 1.0,
+        "val_auc": 1.0
+      },
+      {
+        "epoch": 2,
+        "train_loss": 0.11829,
+        "val_f1": 1.0,
+        "val_acc": 1.0,
+        "val_auc": 1.0
+      },
+      {
+        "epoch": 3,
+        "train_loss": 0.119024,
+        "val_f1": 1.0,
+        "val_acc": 1.0,
+        "val_auc": 1.0
+      },
+      {
+        "epoch": 4,
+        "train_loss": 0.117164,
+        "val_f1": 1.0,
+        "val_acc": 1.0,
+        "val_auc": 1.0
+      }
+    ],
+    "test_metrics": {
+      "loss": 0.11695,
+      "accuracy": 1.0,
+      "f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "roc_auc": 1.0,
+      "fpr": 0.0,
+      "fnr": 0.0,
+      "confusion_matrix": [
+        [
+          121,
+          0
+        ],
+        [
+          0,
+          359
+        ]
+      ]
+    },
+    "model_path": "/Users/yashrajdnyaneshwarkuyate/FiduScan/models/phase2b/exp_d.pth",
+    "artifact_sha256": "f97eef7031579e4dbe3301f906c0e9145ec0f729a315e709cd4ac0c518966408",
+    "description": "ResNet50 baseline (Phase 2A weights + standard augmentation)"
+  }
+}

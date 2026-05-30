@@ -1,0 +1,54 @@
+# ─── Build stage ─────────────────────────────────────────────────────────────
+FROM node:20-slim AS builder
+
+LABEL maintainer="FiduScan Anti-Gravity System"
+LABEL description="FiduScan Next.js Frontend — AI Forensic Dashboard"
+
+WORKDIR /app
+
+# Step 1: Copy package manifest
+COPY frontend/package*.json ./
+
+# Step 2: Copy source files (node_modules excluded via **/node_modules in .dockerignore)
+COPY frontend/ ./
+
+# Step 3: Copy pre-installed node_modules from the macOS host (offline — no npm ci).
+# lightningcss-linux-arm64-gnu@1.32.0 and its .node binary are pre-placed in
+# node_modules/lightningcss/ on the host before this build runs.
+# This resolves: "Cannot find module: lightningcss.linux-arm64-gnu.node"
+COPY frontend/node_modules ./node_modules
+
+# Step 4: Build Next.js
+RUN npm run build
+
+# ─── Production stage ────────────────────────────────────────────────────────
+FROM node:20-slim AS runner
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+COPY --from=builder /app/public ./public
+COPY --from=builder --chown=node:node /app/.next/standalone ./
+COPY --from=builder --chown=node:node /app/.next/static ./.next/static
+
+USER node
+
+EXPOSE 3000
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+# Note: node:20-slim might not have wget or curl installed by default
+# Next.js standalone server does not have health route by default if we don't expose it
+# We can skip healthcheck in Dockerfile and do it in compose if needed, or install curl.
+# We'll just install curl for healthcheck.
+USER root
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+USER node
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+    CMD curl -f http://localhost:3000/ || exit 1
+
+CMD ["node", "server.js"]

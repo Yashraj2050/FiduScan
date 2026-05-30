@@ -1,0 +1,19 @@
+{
+  "phase": "2B",
+  "status": "COMPLETE",
+  "verdict": "CONDITIONALLY READY",
+  "score": 31.0,
+  "tasks_completed": [
+    "T1",
+    "T2",
+    "T3",
+    "T4",
+    "T5",
+    "T6",
+    "T7",
+    "T8"
+  ],
+  "best_experiment": "A",
+  "best_model_path": "/Users/yashrajdnyaneshwarkuyate/FiduScan/models/phase2b/exp_a.pth",
+  "timestamp": "2026-05-30T18:47:36Z"
+}

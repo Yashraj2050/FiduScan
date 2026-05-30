@@ -1,0 +1,106 @@
+{
+  "timestamp": "2026-05-28T21:17:00Z",
+  "total_pipeline_time_sec": 409.2,
+  "summary": {
+    "device": "mps",
+    "dataset": {
+      "real": 500,
+      "fake": 500,
+      "source": "existing"
+    },
+    "dataset_report": {
+      "timestamp": "2026-05-28T21:10:12Z",
+      "dataset_dir": "/Users/yashrajdnyaneshwarkuyate/FiduScan/datasets/raw",
+      "classes": [
+        "fake",
+        "real"
+      ],
+      "class_stats": {
+        "fake": {
+          "total_candidates": 500,
+          "valid": 500,
+          "corrupted": 0,
+          "duplicate": 0,
+          "invalid_ext": 0,
+          "removed": 0,
+          "preprocessed": 500
+        },
+        "real": {
+          "total_candidates": 500,
+          "valid": 500,
+          "corrupted": 0,
+          "duplicate": 0,
+          "invalid_ext": 0,
+          "removed": 0,
+          "preprocessed": 500
+        }
+      },
+      "dimension_stats": {
+        "min_width": 224,
+        "max_width": 224,
+        "avg_width": 224,
+        "min_height": 224,
+        "max_height": 224,
+        "avg_height": 224
+      },
+      "total_valid": 1000,
+      "total_removed": 0,
+      "preprocessing_target": "224x224",
+      "processed_dir": "/Users/yashrajdnyaneshwarkuyate/FiduScan/datasets/processed"
+    },
+    "training": {
+      "loss": 0.127086,
+      "accuracy": 1.0,
+      "f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "roc_auc": 1.0
+    },
+    "security": {
+      "sha256": "692fd9c4c8f88d3a1ed6fa77a823cc11075e449e3e4d7198868953b33c37c49e",
+      "encrypted": "/Users/yashrajdnyaneshwarkuyate/FiduScan/models/encrypted/efficientnet_b0_fiduscan.enc"
+    },
+    "registry": "efficientnet_b0-1780002985",
+    "inference_tests": {
+      "test_real_image": {
+        "prediction": "AUTHENTIC",
+        "confidence": 0.9737,
+        "ai_prob": 0.0263,
+        "authentic_prob": 0.9737,
+        "latency_ms": 4049.52,
+        "status": "pass"
+      },
+      "test_fake_image": {
+        "prediction": "AI_GENERATED",
+        "confidence": 0.9909,
+        "ai_prob": 0.9909,
+        "authentic_prob": 0.0091,
+        "latency_ms": 242.64,
+        "status": "pass"
+      },
+      "test_corrupted": {
+        "status": "correctly_rejected"
+      },
+      "test_unsupported_format": {
+        "status": "correctly_rejected"
+      },
+      "avg_latency_ms": 2146.08,
+      "all_tests_passed": true
+    },
+    "gradcam": {
+      "status": "fallback",
+      "error": "No module named 'cv2'"
+    },
+    "benchmark": {
+      "n_runs": 100,
+      "p50_ms": 15.464,
+      "p95_ms": 18.559,
+      "p99_ms": 31.423,
+      "mean_ms": 16.108,
+      "min_ms": 14.824,
+      "max_ms": 31.423,
+      "throughput_imgs_per_sec": 62.1
+    }
+  },
+  "status": "SUCCESS"
+}

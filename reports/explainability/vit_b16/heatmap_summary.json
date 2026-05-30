@@ -1,0 +1,16 @@
+{
+  "model": "vit_b16",
+  "status": "skipped_incompatibility",
+  "preliminary": true,
+  "n_samples": 0,
+  "n_correct": 0,
+  "n_suspicious_activations": 0,
+  "activation_consistency_mean": 0,
+  "accuracy_on_samples": 0,
+  "heatmaps": [],
+  "output_dir": "/Users/yashrajdnyaneshwarkuyate/FiduScan/reports/explainability/vit_b16",
+  "failure_reason": "GradCAM incompatible with Vision Transformer architecture",
+  "technical_note": "Standard GradCAM requires 4D convolutional feature maps (B, C, H, W). ViT-B16 uses 1D token sequences (B, N, D) from its MultiheadAttention layers. The target layer ln_1 (LayerNorm before attention) produces gradients of shape (B, N, D) which GradCAM cannot interpret as spatial heatmaps. This is a known limitation — ViT requires attention-map based explainability methods such as Attention Rollout, GradSAM, or DINO self-supervised attention visualization instead.",
+  "recommended_alternative": "Use pytorch_grad_cam.methods.vit_explainability (GradSAM) or the attention rollout method for ViT explainability in Phase 2B.",
+  "phase2b_action": "Implement Attention Rollout or GradSAM for ViT-B16 explainability after full cloud GPU training."
+}

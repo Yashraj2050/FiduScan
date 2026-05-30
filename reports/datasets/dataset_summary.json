@@ -1,0 +1,68 @@
+{
+  "timestamp": "2026-05-30T17:29:21Z",
+  "phase": "2A",
+  "datasets": {
+    "cifake": {
+      "real": 2500,
+      "fake": 2500,
+      "source": "existing",
+      "class_counts": {
+        "fake": 2500,
+        "real": 2500
+      },
+      "total_valid": 5000,
+      "class_balance_real_ratio": 0.5,
+      "avg_width": 224.0,
+      "avg_height": 224.0,
+      "removed_corrupted": 0,
+      "removed_duplicates": 0
+    },
+    "synthbuster": {
+      "real": 1000,
+      "fake": 1000,
+      "source": "existing",
+      "class_counts": {
+        "fake": 1000,
+        "real": 1000
+      },
+      "total_valid": 2000,
+      "class_balance_real_ratio": 0.5,
+      "avg_width": 224.0,
+      "avg_height": 224.0,
+      "removed_corrupted": 0,
+      "removed_duplicates": 0
+    },
+    "faceforensics": {
+      "real": 500,
+      "fake": 500,
+      "source": "existing",
+      "class_counts": {
+        "fake": 500,
+        "real": 500
+      },
+      "total_valid": 1000,
+      "class_balance_real_ratio": 0.5,
+      "avg_width": 224.0,
+      "avg_height": 224.0,
+      "removed_corrupted": 0,
+      "removed_duplicates": 0
+    }
+  },
+  "combined": {
+    "class_counts": {
+      "fake": 4000,
+      "real": 4000
+    },
+    "total_valid": 8000,
+    "class_balance_real_ratio": 0.5,
+    "avg_width": 224.0,
+    "avg_height": 224.0,
+    "removed_corrupted": 0,
+    "removed_duplicates": 0
+  },
+  "totals": {
+    "real": 4000,
+    "fake": 4000,
+    "total": 8000
+  }
+}

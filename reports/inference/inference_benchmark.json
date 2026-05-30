@@ -1,0 +1,68 @@
+{
+  "timestamp": "2026-05-28T21:17:00Z",
+  "model": "efficientnet_b0",
+  "device": "mps",
+  "latency": {
+    "n_runs": 100,
+    "p50_ms": 15.464,
+    "p95_ms": 18.559,
+    "p99_ms": 31.423,
+    "mean_ms": 16.108,
+    "min_ms": 14.824,
+    "max_ms": 31.423,
+    "throughput_imgs_per_sec": 62.1
+  },
+  "accuracy": {
+    "accuracy": 1.0,
+    "f1": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "roc_auc": 1.0,
+    "confusion_matrix": [
+      [
+        71,
+        0
+      ],
+      [
+        0,
+        79
+      ]
+    ],
+    "true_positives": 79,
+    "true_negatives": 71,
+    "false_positives": 0,
+    "false_negatives": 0,
+    "classification_report": {
+      "AUTHENTIC": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 71.0
+      },
+      "AI_GENERATED": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 79.0
+      },
+      "accuracy": 1.0,
+      "macro avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 150.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 150.0
+      }
+    }
+  },
+  "memory": {
+    "total_parameters": 4664446,
+    "trainable_parameters": 4664446,
+    "model_size_mb": 17.79
+  }
+}

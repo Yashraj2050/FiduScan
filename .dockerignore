@@ -1,0 +1,29 @@
+# ─── Node / JS ────────────────────────────────────────────────────────────────
+# Exclude ALL node_modules by default...
+**/node_modules
+# ...but explicitly ALLOW frontend/node_modules so the Docker build can
+# copy pre-installed deps and run `npm rebuild` for linux/arm64 binaries.
+!frontend/node_modules
+
+# Exclude Next.js build artifacts (rebuilt inside Docker)
+**/.next
+
+# ─── Python ───────────────────────────────────────────────────────────────────
+**/venv
+**/__pycache__
+**/*.pyc
+**/*.pyo
+
+# ─── Large data / model artifacts (not needed in Docker) ─────────────────────
+datasets
+models
+reports
+
+# ─── Logs ─────────────────────────────────────────────────────────────────────
+logs
+*.log
+
+# ─── Version control & secrets ────────────────────────────────────────────────
+.git
+.env
+.env.*

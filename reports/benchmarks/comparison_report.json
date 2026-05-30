@@ -1,0 +1,210 @@
+{
+  "timestamp": "2026-05-30T17:49:28Z",
+  "models": {
+    "efficientnet_b0": {
+      "test_metrics": {
+        "loss": 0.026042,
+        "accuracy": 1.0,
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "roc_auc": 1.0,
+        "confusion_matrix": [
+          [
+            611,
+            0
+          ],
+          [
+            0,
+            589
+          ]
+        ],
+        "classification_report": {
+          "AUTHENTIC": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 611.0
+          },
+          "AI_GENERATED": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 589.0
+          },
+          "accuracy": 1.0,
+          "macro avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1200.0
+          },
+          "weighted avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1200.0
+          }
+        }
+      },
+      "latency": {
+        "n_runs": 50,
+        "p50_ms": 14.403,
+        "p95_ms": 14.838,
+        "p99_ms": 15.171,
+        "mean_ms": 14.43,
+        "throughput_imgs_per_sec": 69.3
+      },
+      "memory": {
+        "total_parameters": 4664446,
+        "trainable_parameters": 4664446,
+        "model_size_mb": 17.79
+      },
+      "preliminary": false
+    },
+    "resnet50": {
+      "test_metrics": {
+        "loss": 0.028055,
+        "accuracy": 1.0,
+        "f1": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "roc_auc": 1.0,
+        "confusion_matrix": [
+          [
+            611,
+            0
+          ],
+          [
+            0,
+            589
+          ]
+        ],
+        "classification_report": {
+          "AUTHENTIC": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 611.0
+          },
+          "AI_GENERATED": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 589.0
+          },
+          "accuracy": 1.0,
+          "macro avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1200.0
+          },
+          "weighted avg": {
+            "precision": 1.0,
+            "recall": 1.0,
+            "f1-score": 1.0,
+            "support": 1200.0
+          }
+        }
+      },
+      "latency": {
+        "n_runs": 50,
+        "p50_ms": 15.973,
+        "p95_ms": 17.312,
+        "p99_ms": 19.324,
+        "mean_ms": 16.114,
+        "throughput_imgs_per_sec": 62.1
+      },
+      "memory": {
+        "total_parameters": 24033090,
+        "trainable_parameters": 24033090,
+        "model_size_mb": 91.68
+      },
+      "preliminary": false
+    },
+    "vit_b16": {
+      "test_metrics": {
+        "loss": 0.68506,
+        "accuracy": 0.541667,
+        "f1": 0.233983,
+        "precision": 0.651163,
+        "recall": 0.142615,
+        "roc_auc": 0.45971,
+        "confusion_matrix": [
+          [
+            566,
+            45
+          ],
+          [
+            505,
+            84
+          ]
+        ],
+        "classification_report": {
+          "AUTHENTIC": {
+            "precision": 0.5284780578898226,
+            "recall": 0.9263502454991817,
+            "f1-score": 0.6730083234244947,
+            "support": 611.0
+          },
+          "AI_GENERATED": {
+            "precision": 0.6511627906976745,
+            "recall": 0.14261460101867574,
+            "f1-score": 0.233983286908078,
+            "support": 589.0
+          },
+          "accuracy": 0.5416666666666666,
+          "macro avg": {
+            "precision": 0.5898204242937486,
+            "recall": 0.5344824232589287,
+            "f1-score": 0.45349580516628635,
+            "support": 1200.0
+          },
+          "weighted avg": {
+            "precision": 0.58869581424301,
+            "recall": 0.5416666666666666,
+            "f1-score": 0.45752020133435345,
+            "support": 1200.0
+          }
+        }
+      },
+      "latency": {
+        "n_runs": 50,
+        "p50_ms": 77.337,
+        "p95_ms": 79.154,
+        "p99_ms": 79.403,
+        "mean_ms": 77.396,
+        "throughput_imgs_per_sec": 12.9
+      },
+      "memory": {
+        "total_parameters": 85800194,
+        "trainable_parameters": 85800194,
+        "model_size_mb": 327.3
+      },
+      "preliminary": true
+    }
+  },
+  "ranking": {
+    "by_f1": [
+      "efficientnet_b0",
+      "resnet50",
+      "vit_b16"
+    ],
+    "by_auc": [
+      "efficientnet_b0",
+      "resnet50",
+      "vit_b16"
+    ],
+    "by_latency": [
+      "efficientnet_b0",
+      "resnet50",
+      "vit_b16"
+    ],
+    "by_size": [
+      "efficientnet_b0",
+      "resnet50",
+      "vit_b16"
+    ]
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "model": "resnet50",
+  "device": "mps",
+  "preliminary": false,
+  "test_metrics": {
+    "loss": 0.028055,
+    "accuracy": 1.0,
+    "f1": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "roc_auc": 1.0,
+    "confusion_matrix": [
+      [
+        611,
+        0
+      ],
+      [
+        0,
+        589
+      ]
+    ],
+    "classification_report": {
+      "AUTHENTIC": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 611.0
+      },
+      "AI_GENERATED": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 589.0
+      },
+      "accuracy": 1.0,
+      "macro avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 1200.0
+      },
+      "weighted avg": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 1200.0
+      }
+    }
+  },
+  "confusion_matrix": [
+    [
+      611,
+      0
+    ],
+    [
+      0,
+      589
+    ]
+  ],
+  "classification_report": {
+    "AUTHENTIC": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 611.0
+    },
+    "AI_GENERATED": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 589.0
+    },
+    "accuracy": 1.0,
+    "macro avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 1200.0
+    },
+    "weighted avg": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 1200.0
+    }
+  },
+  "false_positive_rate": 0.0,
+  "latency": {
+    "n_runs": 50,
+    "p50_ms": 15.973,
+    "p95_ms": 17.312,
+    "p99_ms": 19.324,
+    "mean_ms": 16.114,
+    "throughput_imgs_per_sec": 62.1
+  },
+  "memory": {
+    "total_parameters": 24033090,
+    "trainable_parameters": 24033090,
+    "model_size_mb": 91.68
+  },
+  "model_path": "/Users/yashrajdnyaneshwarkuyate/FiduScan/models/resnet50_phase2a.pth",
+  "artifact_sha256": "cc1700cba947603833a27d0ae5d02ff88506278d741cb50c836f860d4bf9c8cf"
+}
