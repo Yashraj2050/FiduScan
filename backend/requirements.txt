@@ -35,3 +35,5 @@ pyyaml==6.0.2
 
 # Dataset download (no kaggle API needed)
 requests==2.32.3
+sqlalchemy==2.0.32
+psycopg2-binary==2.9.9
