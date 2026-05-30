@@ -3,7 +3,7 @@ import { getToken } from './auth';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-function getAuthHeaders() {
+function getAuthHeaders(): Record<string, string> {
   const token = getToken();
   return token ? { 'Authorization': `Bearer ${token}` } : {};
 }

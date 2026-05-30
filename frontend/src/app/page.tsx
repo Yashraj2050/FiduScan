@@ -280,8 +280,8 @@ export default function Dashboard() {
             {/* Heatmap */}
             {state === 'result' && result && (
               <HeatmapViewer
-                available={result.heatmap_available}
-                heatmapB64={result.heatmap_b64}
+                available={'heatmap_available' in result ? result.heatmap_available : false}
+                heatmapB64={'heatmap_b64' in result ? result.heatmap_b64 : null}
               />
             )}
 
