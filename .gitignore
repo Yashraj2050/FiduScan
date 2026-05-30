@@ -54,3 +54,4 @@ frontend/.env.local
 
 # Docker volumes
 cloud-orchestrator/volumes/
+*.bundle
