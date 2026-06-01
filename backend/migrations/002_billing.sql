@@ -1,0 +1,4 @@
+CREATE TABLE subscriptions (id VARCHAR PRIMARY KEY, user_id VARCHAR REFERENCES users(user_id), stripe_customer_id VARCHAR NOT NULL, stripe_subscription_id VARCHAR NOT NULL, plan VARCHAR NOT NULL, status VARCHAR NOT NULL, current_period_end TIMESTAMP NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE invoices (id VARCHAR PRIMARY KEY, subscription_id VARCHAR REFERENCES subscriptions(id), amount INTEGER NOT NULL, status VARCHAR NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE billing_events (id VARCHAR PRIMARY KEY, event_type VARCHAR NOT NULL, payload JSON NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE usage_tracking (id SERIAL PRIMARY KEY, user_id VARCHAR REFERENCES users(user_id), image_scans INTEGER DEFAULT 0, audio_scans INTEGER DEFAULT 0, video_scans INTEGER DEFAULT 0, api_calls INTEGER DEFAULT 0, storage_used INTEGER DEFAULT 0, reset_date TIMESTAMP NOT NULL);

@@ -79,3 +79,40 @@ class ApiKey(Base):
     is_active = Column(Integer, default=1)
     
     workspace = relationship("Workspace", back_populates="api_keys")
+
+class Subscription(Base):
+    __tablename__ = "subscriptions"
+    id = Column(String, primary_key=True, index=True)
+    user_id = Column(String, ForeignKey("users.user_id"), nullable=False)
+    stripe_customer_id = Column(String, nullable=False)
+    stripe_subscription_id = Column(String, nullable=False)
+    plan = Column(String, nullable=False) # FREE, PRO, ENTERPRISE
+    status = Column(String, nullable=False) # active, past_due, canceled
+    current_period_end = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class Invoice(Base):
+    __tablename__ = "invoices"
+    id = Column(String, primary_key=True, index=True)
+    subscription_id = Column(String, ForeignKey("subscriptions.id"))
+    amount = Column(Integer, nullable=False)
+    status = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class BillingEvent(Base):
+    __tablename__ = "billing_events"
+    id = Column(String, primary_key=True, index=True)
+    event_type = Column(String, nullable=False)
+    payload = Column(JSON, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class UsageTracking(Base):
+    __tablename__ = "usage_tracking"
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    user_id = Column(String, ForeignKey("users.user_id"), nullable=False)
+    image_scans = Column(Integer, default=0)
+    audio_scans = Column(Integer, default=0)
+    video_scans = Column(Integer, default=0)
+    api_calls = Column(Integer, default=0)
+    storage_used = Column(Integer, default=0)
+    reset_date = Column(DateTime(timezone=True), nullable=False)
