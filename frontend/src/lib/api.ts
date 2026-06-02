@@ -181,3 +181,16 @@ export async function getUsage(): Promise<any> {
 
   return response.json();
 }
+
+export async function getSubscription(): Promise<{ status: string, plan: string, current_period_end: string | null }> {
+  const response = await fetch(`${API_BASE}/api/v1/billing/subscription`, {
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
+    throw new Error(error.detail || `HTTP ${response.status}`);
+  }
+
+  return response.json();
+}

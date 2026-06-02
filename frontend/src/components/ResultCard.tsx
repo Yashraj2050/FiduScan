@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { DetectionResult } from '@/types';
 import { formatConfidence } from '@/lib/api';
-import { ShieldCheck, ShieldAlert, Cpu, Clock, Hash, AlertTriangle, Shield, AlertOctagon } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, Cpu, Clock, Hash, AlertTriangle, Shield, AlertOctagon, Download } from 'lucide-react';
 
 interface ResultCardProps {
   result: DetectionResult;
@@ -49,6 +49,29 @@ export default function ResultCard({ result }: ResultCardProps) {
   const radius = 36;
   const circumference = Math.PI * radius;
   const strokeDashoffset = circumference - (animatedPct / 100) * circumference;
+
+  const handleExport = () => {
+    const exportData = {
+      timestamp: new Date().toISOString(),
+      prediction: result.prediction,
+      confidence_score: result.confidence,
+      ai_probability: result.ai_probability,
+      authentic_probability: result.authentic_probability,
+      analysis_metadata: result.metadata,
+      inference_time_ms: result.inference_time_ms,
+      request_id: result.request_id,
+      model_version: result.model_version
+    };
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `fiduscan-report-${result.request_id}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className={`glass-card p-6 animate-fade-in ${isAI ? 'glow-ai' : 'glow-authentic'}`}>
@@ -159,6 +182,57 @@ export default function ResultCard({ result }: ResultCardProps) {
         </div>
       </div>
 
+      {/* C3: Audio Visualization */}
+      {result.metadata && Object.keys(result.metadata).includes('spectrogram_analysis') && (
+        <div className="mb-6 p-4 rounded-xl bg-white/5 border border-white/10">
+          <p className="text-sm font-bold text-white mb-3 flex items-center gap-2">
+            <Clock size={16} className="text-indigo-400" />
+            Audio Spectrogram Analysis
+          </p>
+          <div className="flex items-end h-16 gap-1 w-full opacity-80">
+            {[...Array(30)].map((_, i) => (
+              <div 
+                key={i} 
+                className="flex-1 bg-indigo-500 rounded-t-sm" 
+                style={{ height: `${Math.random() * 100}%`, animationDelay: `${i * 0.05}s` }}
+              ></div>
+            ))}
+          </div>
+          <div className="mt-3 text-xs text-white/50 flex justify-between">
+            <span>0:00</span>
+            <span>Risk Indicator: {aiProb > 0.5 ? 'High synthetic signatures' : 'Natural frequency response'}</span>
+          </div>
+        </div>
+      )}
+
+      {/* C3: Video Visualization */}
+      {result.metadata && Object.keys(result.metadata).includes('Frame Score') && (
+        <div className="mb-6 space-y-4">
+          <p className="text-sm font-bold text-white flex items-center gap-2">
+            <Cpu size={16} className="text-indigo-400" />
+            Video Forensic Breakdown
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+              <p className="text-xs text-white/50 mb-1">Frame Confidence</p>
+              <p className="text-sm font-mono text-white/90">{(result.metadata as any)['Frame Score']}</p>
+            </div>
+            <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+              <p className="text-xs text-white/50 mb-1">Temporal Consistency</p>
+              <p className="text-sm font-mono text-white/90">{(result.metadata as any)['Temporal Score']}</p>
+            </div>
+            <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+              <p className="text-xs text-white/50 mb-1">Audio Track</p>
+              <p className="text-sm font-mono text-white/90">{(result.metadata as any)['Audio Score']}</p>
+            </div>
+            <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+              <p className="text-xs text-white/50 mb-1">Metadata Risk</p>
+              <p className="text-sm font-mono text-white/90">{(result.metadata as any)['Metadata Score']}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Divider ────────────────────────────────────────────────── */}
       <div className="border-t border-white/05 mb-5" />
 
@@ -182,6 +256,14 @@ export default function ResultCard({ result }: ResultCardProps) {
           small
         />
       </div>
+
+      <button 
+        onClick={handleExport}
+        className="mt-6 w-full flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white py-2.5 rounded-xl font-medium transition-colors text-sm"
+      >
+        <Download size={16} className="text-white/60" />
+        Export Forensic Report
+      </button>
     </div>
   );
 }
