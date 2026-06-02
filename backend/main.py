@@ -26,7 +26,7 @@ from utils.logger import setup_logger
 logger = setup_logger("fiduscan.main")
 
 ALLOWED_ORIGINS = os.environ.get(
-    "CORS_ORIGINS", "http://localhost:3000"
+    "CORS_ORIGINS", "http://localhost:3000,https://fiduscan.vercel.app"
 ).split(",")
 
 
@@ -76,8 +76,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["GET", "POST"],
-    allow_headers=["Content-Type", "Authorization", "X-Request-ID"],
+    allow_methods=["*"],
+    allow_headers=["*"],
     expose_headers=["X-Request-ID"],
     max_age=600,
 )
