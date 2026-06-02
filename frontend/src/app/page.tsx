@@ -463,6 +463,7 @@ export default function Dashboard() {
               <IdlePlaceholder />
             )}
           </div>
+        </div>
         </>
         )}
 

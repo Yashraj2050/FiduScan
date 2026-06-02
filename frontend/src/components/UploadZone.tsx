@@ -274,7 +274,7 @@ export default function UploadZone({ onFileSelect, isAnalyzing, status = 'idle',
           accept={acceptedTypes.join(',')}
           className="sr-only"
           onChange={handleInputChange}
-          disabled={isAnalyzing || isUploading || status === 'result'}
+          disabled={isAnalyzing || isUploading}
         />
       )}
 

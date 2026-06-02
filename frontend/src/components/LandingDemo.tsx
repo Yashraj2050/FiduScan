@@ -20,9 +20,11 @@ export default function LandingDemo({ onSignInClick }: LandingDemoProps) {
     ai_probability: 0.98,
     inference_time_ms: 124,
     request_id: 'demo-req-12345',
+    filename: 'synth_profile_04.jpg',
     metadata: {},
     heatmap_available: false,
     heatmap_b64: null,
+    model_version: 'v1.0',
   };
 
   const startDemo = () => {
