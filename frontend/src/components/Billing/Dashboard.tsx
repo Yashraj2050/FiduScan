@@ -3,31 +3,32 @@
 import { useState } from 'react';
 import { CreditCard, CheckCircle2, Zap, ArrowRight, Clock, Receipt } from 'lucide-react';
 import { createCheckoutSession, createPortalSession } from '@/lib/api';
+import { useToast } from '@/components/ToastContext';
 
 export default function BillingDashboard() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
 
   const handleCheckout = async (plan: string) => {
     setLoading(true);
-    setError(null);
+    toast.info('Initializing checkout...');
     try {
       const data = await createCheckoutSession(plan);
       window.location.href = data.url;
-    } catch (err: any) {
-      setError(err.message || 'Failed to initialize checkout');
+    } catch (err: unknown) {
+      toast.error((err as Error).message || 'Failed to initialize checkout');
       setLoading(false);
     }
   };
 
   const handlePortal = async () => {
     setLoading(true);
-    setError(null);
+    toast.info('Opening billing portal...');
     try {
       const data = await createPortalSession();
       window.location.href = data.url;
-    } catch (err: any) {
-      setError(err.message || 'Failed to open billing portal');
+    } catch (err: unknown) {
+      toast.error((err as Error).message || 'Failed to open billing portal');
       setLoading(false);
     }
   };
@@ -43,12 +44,6 @@ export default function BillingDashboard() {
           <p className="text-sm text-white/50">Manage your subscription and payment methods</p>
         </div>
       </div>
-
-      {error && (
-        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-          {error}
-        </div>
-      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Current Plan Card */}

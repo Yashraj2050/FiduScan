@@ -12,13 +12,15 @@ import HistoryPanel from '@/components/HistoryPanel';
 import SettingsHub from '@/components/SettingsHub';
 import { detectImage, detectAudio, detectVideo } from '@/lib/api';
 import { login, register, getToken, removeToken } from '@/lib/auth';
+import QuotaBar from '@/components/QuotaBar';
+import { useToast } from '@/components/ToastContext';
 import { DetectionResult, AudioDetectionResult, VideoDetectionResult } from '@/types';
 
 type AppState = 'idle' | 'analyzing' | 'result' | 'error';
 type Modality = 'image' | 'audio' | 'video';
 
 export default function Dashboard() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [showAuth, setShowAuth] = useState(false);
   const [activeTab, setActiveTab] = useState<'scanner' | 'history' | 'settings'>('scanner');
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
@@ -45,8 +47,19 @@ export default function Dashboard() {
   const [result, setResult] = useState<DetectionResult | AudioDetectionResult | VideoDetectionResult | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // B3: Toast Hook
+  const toast = useToast();
+
+  // B4: First Login Onboarding state
+  const [showWelcome, setShowWelcome] = useState(false);
+
   useEffect(() => {
-    if (getToken()) setIsAuthenticated(true);
+    if (getToken()) {
+      setIsAuthenticated(true); // eslint-disable-line react-hooks/set-state-in-effect
+      if (!localStorage.getItem('fiduscan_onboarded')) {
+        setShowWelcome(true); // eslint-disable-line react-hooks/set-state-in-effect
+      }
+    }
   }, []);
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -69,12 +82,19 @@ export default function Dashboard() {
     try {
       if (authMode === 'login') {
         await login(email, password);
+        toast.success('Successfully logged in');
       } else {
         await register(email, password);
+        toast.success('Account created successfully');
       }
       setIsAuthenticated(true);
+      if (!localStorage.getItem('fiduscan_onboarded')) {
+        setShowWelcome(true);
+      }
     } catch (err: unknown) {
-      setAuthError((err as Error).message || 'Authentication failed. Please try again.');
+      const errorMsg = (err as Error).message || 'Authentication failed. Please try again.';
+      setAuthError(errorMsg);
+      toast.error(errorMsg);
     }
   };
 
@@ -91,7 +111,8 @@ export default function Dashboard() {
     setState('idle');
     setResult(null);
     setErrorMsg(null);
-  }, []);
+    toast.info('Logged out securely');
+  }, [toast]);
 
   const handleFileSelect = useCallback(async (file: File) => {
     setState('analyzing');
@@ -128,16 +149,19 @@ export default function Dashboard() {
       
       setResult(data);
       setState('result');
+      toast.success('Analysis complete');
     } catch (err: unknown) {
       if (err instanceof Error && err.message.includes('401')) {
         handleLogout();
+        return;
       }
       const message = err instanceof Error ? err.message : 'Analysis failed. Please try again.';
       const sanitized = message.replace(/localhost:\d+/g, 'the detection service');
       setErrorMsg(sanitized);
       setState('error');
+      toast.error(sanitized);
     }
-  }, [modality]);
+  }, [modality, toast, handleLogout]);
 
   const handleReset = useCallback(() => {
     setState('idle');
@@ -345,6 +369,9 @@ export default function Dashboard() {
           </div>
 
           <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
+            {/* B1: QuotaBar Integration */}
+            <QuotaBar />
+            
             <div className="flex bg-white/[0.04] rounded-lg p-1 border border-white/10 w-full sm:w-auto overflow-x-auto hide-scrollbar">
               <button 
                 onClick={() => setActiveTab('scanner')} 
@@ -372,6 +399,44 @@ export default function Dashboard() {
             </button>
           </div>
         </header>
+
+        {/* B4: Welcome Onboarding Banner */}
+        {showWelcome && (
+          <div className="mb-8 p-6 rounded-xl border border-indigo-500/30 bg-indigo-500/10 backdrop-blur-sm relative animate-fade-in flex flex-col sm:flex-row gap-6 items-start sm:items-center justify-between">
+            <button 
+              onClick={() => {
+                setShowWelcome(false);
+                localStorage.setItem('fiduscan_onboarded', 'true');
+              }}
+              className="absolute top-4 right-4 text-white/40 hover:text-white"
+            >
+              <XIcon size={16} />
+            </button>
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Shield size={18} className="text-indigo-400" />
+                <h2 className="text-lg font-bold text-white">Welcome to FiduScan</h2>
+              </div>
+              <p className="text-sm text-white/60 mb-4 max-w-2xl">
+                Get started with your first forensic analysis. Our multi-modal AI engine detects synthetic manipulations across images, audio, and video formats.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-medium">
+                <div className="flex items-center gap-2 text-white/80"><span className="flex items-center justify-center w-5 h-5 rounded bg-indigo-500/20 text-indigo-300">1</span> Upload a file</div>
+                <div className="flex items-center gap-2 text-white/80"><span className="flex items-center justify-center w-5 h-5 rounded bg-indigo-500/20 text-indigo-300">2</span> Review AI scores</div>
+                <div className="flex items-center gap-2 text-white/80"><span className="flex items-center justify-center w-5 h-5 rounded bg-indigo-500/20 text-indigo-300">3</span> View forensics history</div>
+              </div>
+            </div>
+            <button 
+              onClick={() => {
+                setShowWelcome(false);
+                localStorage.setItem('fiduscan_onboarded', 'true');
+              }}
+              className="px-4 py-2 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-medium transition-colors shrink-0 whitespace-nowrap w-full sm:w-auto text-center shadow-lg shadow-indigo-500/20"
+            >
+              Get Started
+            </button>
+          </div>
+        )}
 
         {activeTab === 'history' ? (
           <HistoryPanel />

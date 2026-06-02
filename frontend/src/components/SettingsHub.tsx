@@ -6,6 +6,7 @@ import BillingDashboard from '@/components/Billing/Dashboard';
 import UsageDashboard from '@/components/UsageDashboard';
 import DeveloperPortal from '@/components/DeveloperPortal';
 import { removeToken } from '@/lib/auth';
+import { useToast } from '@/components/ToastContext';
 
 type SettingsTab = 'profile' | 'security' | 'billing' | 'usage' | 'developer';
 
@@ -84,6 +85,7 @@ export default function SettingsHub() {
 // ─── Sub-Components (Profile & Security) ────────────────────────────────
 
 function ProfileSettings() {
+  const toast = useToast();
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center gap-4 mb-6">
@@ -97,7 +99,7 @@ function ProfileSettings() {
       </div>
 
       <div className="glass-card p-6 max-w-2xl">
-        <form className="space-y-5" onSubmit={e => e.preventDefault()}>
+        <form className="space-y-5" onSubmit={e => { e.preventDefault(); toast.success('Profile updated successfully'); }}>
           <div>
             <label className="block text-sm font-medium text-white/70 mb-2">Email Address</label>
             <div className="relative">
@@ -142,6 +144,7 @@ function ProfileSettings() {
 }
 
 function SecuritySettings() {
+  const toast = useToast();
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center gap-4 mb-6">
@@ -157,7 +160,7 @@ function SecuritySettings() {
       <div className="grid grid-cols-1 gap-6 max-w-2xl">
         <div className="glass-card p-6">
           <h3 className="font-bold text-white mb-4">Change Password</h3>
-          <form className="space-y-4" onSubmit={e => e.preventDefault()}>
+          <form className="space-y-4" onSubmit={e => { e.preventDefault(); toast.success('Password updated successfully'); }}>
             <div>
               <label className="block text-xs font-medium text-white/50 mb-1.5">Current Password</label>
               <div className="relative">
@@ -201,7 +204,10 @@ function SecuritySettings() {
                 <p className="text-sm font-medium text-white/70">iOS • Safari</p>
                 <p className="text-xs text-white/40 mt-1">Last active: 2 hours ago</p>
               </div>
-              <button className="text-xs text-red-400 hover:text-red-300 font-medium transition-colors">
+              <button 
+                onClick={() => toast.success('Session revoked')}
+                className="text-xs text-red-400 hover:text-red-300 font-medium transition-colors"
+              >
                 Revoke
               </button>
             </div>

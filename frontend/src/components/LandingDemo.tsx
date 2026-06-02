@@ -60,6 +60,12 @@ export default function LandingDemo({ onSignInClick, onRegisterClick }: LandingD
           <div className="flex items-center gap-4">
             {/* A4: Enterprise link scrolls to enterprise section */}
             <button
+              onClick={() => document.getElementById('pricing-section')?.scrollIntoView({ behavior: 'smooth' })}
+              className="text-sm text-white/60 hover:text-white transition-colors hidden sm:block"
+            >
+              Pricing
+            </button>
+            <button
               onClick={() => document.getElementById('enterprise-section')?.scrollIntoView({ behavior: 'smooth' })}
               className="text-sm text-white/60 hover:text-white transition-colors hidden sm:block"
             >
@@ -204,6 +210,89 @@ export default function LandingDemo({ onSignInClick, onRegisterClick }: LandingD
                   <p className="text-white/40 text-sm">Run the simulation to see a forensic report.</p>
                 </div>
               )}
+            </div>
+          </div>
+        </section>
+
+        {/* Pricing Section (B2) */}
+        <section id="pricing-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-white/05">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold mb-4">Simple, Transparent Pricing</h2>
+            <p className="text-white/40">Scale your trust &amp; safety operations with plans designed for any volume.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {/* Free Tier */}
+            <div className="glass-card p-8 flex flex-col">
+              <h3 className="text-xl font-bold mb-2">Free</h3>
+              <p className="text-sm text-white/50 mb-6">Perfect for testing and personal use.</p>
+              <div className="mb-8">
+                <span className="text-4xl font-bold">$0</span>
+                <span className="text-white/40"> / month</span>
+              </div>
+              <ul className="space-y-4 mb-8 flex-1">
+                {['100 Scans / month', 'Image Analysis Only', 'Standard Dashboard', 'Community Support'].map(feature => (
+                  <li key={feature} className="flex items-center gap-3">
+                    <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
+                    <span className="text-sm text-white/80">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <button 
+                onClick={onRegisterClick}
+                className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium transition-colors border border-white/10"
+              >
+                Start Free
+              </button>
+            </div>
+
+            {/* Pro Tier */}
+            <div className="glass-card p-8 flex flex-col relative border-indigo-500/50 transform md:-translate-y-4 shadow-2xl shadow-indigo-500/10">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 px-3 py-1 bg-indigo-500 text-white text-xs font-bold rounded-full">
+                Most Popular
+              </div>
+              <h3 className="text-xl font-bold mb-2 text-indigo-400">Pro</h3>
+              <p className="text-sm text-white/50 mb-6">For growing platforms and startups.</p>
+              <div className="mb-8">
+                <span className="text-4xl font-bold">$49</span>
+                <span className="text-white/40"> / month</span>
+              </div>
+              <ul className="space-y-4 mb-8 flex-1">
+                {['10,000 Scans / month', 'Image, Audio & Video', 'API Access', 'Priority Support'].map(feature => (
+                  <li key={feature} className="flex items-center gap-3">
+                    <CheckCircle2 size={16} className="text-indigo-400 shrink-0" />
+                    <span className="text-sm text-white/80">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <button 
+                onClick={onRegisterClick}
+                className="w-full py-3 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white font-medium transition-colors shadow-lg shadow-indigo-500/25"
+              >
+                Upgrade to Pro
+              </button>
+            </div>
+
+            {/* Enterprise Tier */}
+            <div className="glass-card p-8 flex flex-col">
+              <h3 className="text-xl font-bold mb-2">Enterprise</h3>
+              <p className="text-sm text-white/50 mb-6">For high-volume media pipelines.</p>
+              <div className="mb-8">
+                <span className="text-4xl font-bold">Custom</span>
+              </div>
+              <ul className="space-y-4 mb-8 flex-1">
+                {['Unlimited Scans', 'Custom SLAs', 'Dedicated Infrastructure', 'White-glove Onboarding'].map(feature => (
+                  <li key={feature} className="flex items-center gap-3">
+                    <CheckCircle2 size={16} className="text-purple-400 shrink-0" />
+                    <span className="text-sm text-white/80">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <button 
+                onClick={() => document.getElementById('enterprise-section')?.scrollIntoView({ behavior: 'smooth' })}
+                className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium transition-colors border border-white/10"
+              >
+                Contact Sales
+              </button>
             </div>
           </div>
         </section>

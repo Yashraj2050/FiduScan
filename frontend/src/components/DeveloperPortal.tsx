@@ -4,31 +4,33 @@ import { useState, useEffect } from 'react';
 import { Key, Copy, Check, Trash2, Plus, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { createApiKey, listApiKeys, revokeApiKey } from '@/lib/api';
 import { ApiKeyResponse } from '@/types';
+import { useToast } from '@/components/ToastContext';
+import { useCallback } from 'react';
 
 export default function DeveloperPortal() {
   const [keys, setKeys] = useState<ApiKeyResponse[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
   const [newKeyName, setNewKeyName] = useState('');
   const [newlyCreatedKey, setNewlyCreatedKey] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    fetchKeys();
-  }, []);
-
-  const fetchKeys = async () => {
+  const fetchKeys = useCallback(async () => {
     setLoading(true);
     try {
       const data = await listApiKeys();
       setKeys(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load API keys');
+    } catch (err: unknown) {
+      toast.error((err as Error).message || 'Failed to load API keys');
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchKeys();
+  }, [fetchKeys]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,9 +41,10 @@ export default function DeveloperPortal() {
       const result = await createApiKey(newKeyName);
       setNewlyCreatedKey(result.api_key);
       setNewKeyName('');
+      toast.success('API Key generated successfully');
       await fetchKeys(); // refresh list
-    } catch (err: any) {
-      setError(err.message || 'Failed to create key');
+    } catch (err: unknown) {
+      toast.error((err as Error).message || 'Failed to create key');
     } finally {
       setIsCreating(false);
     }
@@ -52,9 +55,10 @@ export default function DeveloperPortal() {
     
     try {
       await revokeApiKey(id);
+      toast.success('API Key revoked');
       await fetchKeys(); // refresh list
-    } catch (err: any) {
-      setError(err.message || 'Failed to revoke key');
+    } catch (err: unknown) {
+      toast.error((err as Error).message || 'Failed to revoke key');
     }
   };
 
@@ -81,13 +85,6 @@ export default function DeveloperPortal() {
           </div>
         </div>
       </div>
-
-      {error && (
-        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center gap-3 text-red-400">
-          <AlertTriangle size={18} />
-          <span className="text-sm">{error}</span>
-        </div>
-      )}
 
       {/* ── New Key Creation Alert ───────────────────────────────────── */}
       {newlyCreatedKey && (
