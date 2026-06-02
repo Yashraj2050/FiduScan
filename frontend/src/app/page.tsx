@@ -1,11 +1,14 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { Shield, Scan, RotateCcw, Activity, LogOut, User as UserIcon } from 'lucide-react';
+import { Shield, Scan, RotateCcw, Activity, LogOut, User as UserIcon, Eye, EyeOff, Check, X as XIcon, AlertCircle, History, LayoutDashboard } from 'lucide-react';
 import UploadZone from '@/components/UploadZone';
 import ResultCard from '@/components/ResultCard';
+import { ScanResultSkeleton } from '@/components/Skeletons';
 import MetadataViewer from '@/components/MetadataViewer';
 import HeatmapViewer from '@/components/HeatmapViewer';
+import LandingDemo from '@/components/LandingDemo';
+import HistoryPanel from '@/components/HistoryPanel';
 import { detectImage, detectAudio, detectVideo } from '@/lib/api';
 import { login, register, getToken, removeToken } from '@/lib/auth';
 import { DetectionResult, AudioDetectionResult, VideoDetectionResult } from '@/types';
@@ -15,10 +18,22 @@ type Modality = 'image' | 'audio' | 'video';
 
 export default function Dashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
+  const [activeTab, setActiveTab] = useState<'scanner' | 'history'>('scanner');
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
+
+  const passwordRules = {
+    length: password.length >= 8,
+    number: /\d/.test(password),
+    special: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+  };
+  const isPasswordValid = passwordRules.length && passwordRules.number && passwordRules.special;
 
   const [modality, setModality] = useState<Modality>('image');
   const [state, setState] = useState<AppState>('idle');
@@ -32,6 +47,20 @@ export default function Dashboard() {
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError(null);
+    setEmailError(false);
+    setPasswordError(false);
+    
+    if (!email.includes('@')) {
+      setEmailError(true);
+      setAuthError('Please enter a valid email address');
+      return;
+    }
+    if (authMode === 'register' && !isPasswordValid) {
+      setPasswordError(true);
+      setAuthError('Please meet all password requirements');
+      return;
+    }
+
     try {
       if (authMode === 'login') {
         await login(email, password);
@@ -102,42 +131,95 @@ export default function Dashboard() {
   }, []);
 
   if (!isAuthenticated) {
+    if (!showAuth) {
+      return <LandingDemo onSignInClick={() => setShowAuth(true)} />;
+    }
+
     return (
-      <main className="relative min-h-screen flex items-center justify-center bg-black">
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-indigo-600/10 blur-[120px]" />
-        <div className="glass-card p-8 w-full max-w-md z-10">
+      <main className="relative min-h-screen flex items-center justify-center bg-black px-4">
+        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] max-w-full rounded-full bg-indigo-600/10 blur-[120px]" />
+        <div className="glass-card p-6 sm:p-8 w-full max-w-md z-10 animate-fade-in relative">
+          <button 
+            onClick={() => setShowAuth(false)}
+            className="absolute top-4 right-4 text-white/40 hover:text-white transition-colors p-2"
+          >
+            <XIcon size={20} />
+          </button>
           <div className="flex items-center gap-3 mb-8 justify-center">
             <Shield size={28} className="text-indigo-400" />
             <h1 className="text-2xl font-bold text-white">FiduScan Beta</h1>
           </div>
-          <form onSubmit={handleAuth} className="space-y-4">
+          <form onSubmit={handleAuth} className="space-y-5">
             <div>
-              <label className="text-xs text-white/50 mb-1 block">Email</label>
-              <input 
-                type="email" 
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500 transition-colors" 
-                required 
-              />
+              <label className="text-xs text-white/50 mb-1.5 block font-medium">Email</label>
+              <div className="relative">
+                <input 
+                  type="email" 
+                  value={email}
+                  onChange={e => { setEmail(e.target.value); setEmailError(false); }}
+                  className={`w-full bg-white/5 border ${emailError ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-indigo-500'} rounded-lg px-4 py-2.5 text-white focus:outline-none transition-colors`} 
+                  placeholder="name@example.com"
+                  required 
+                />
+              </div>
             </div>
             <div>
-              <label className="text-xs text-white/50 mb-1 block">Password</label>
-              <input 
-                type="password" 
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500 transition-colors" 
-                required 
-              />
+              <label className="text-xs text-white/50 mb-1.5 block font-medium">Password</label>
+              <div className="relative">
+                <input 
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={e => { setPassword(e.target.value); setPasswordError(false); }}
+                  className={`w-full bg-white/5 border ${passwordError ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-indigo-500'} rounded-lg pl-4 pr-10 py-2.5 text-white focus:outline-none transition-colors`} 
+                  placeholder="••••••••"
+                  required 
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/80 transition-colors"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
             </div>
-            {authError && <p className="text-red-400 text-xs">{authError}</p>}
-            <button type="submit" className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-2 rounded-lg transition-colors">
+
+            {authMode === 'register' && (
+              <div className="space-y-2 bg-white/[0.02] p-3 rounded-lg border border-white/05">
+                <p className="text-[10px] uppercase tracking-wider font-semibold text-white/40 mb-2">Password Requirements</p>
+                <div className="flex items-center gap-2 text-xs">
+                  {passwordRules.length ? <Check size={12} className="text-emerald-400" /> : <XIcon size={12} className="text-white/20" />}
+                  <span className={passwordRules.length ? "text-emerald-400/80" : "text-white/40"}>At least 8 characters</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  {passwordRules.number ? <Check size={12} className="text-emerald-400" /> : <XIcon size={12} className="text-white/20" />}
+                  <span className={passwordRules.number ? "text-emerald-400/80" : "text-white/40"}>Contains a number</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  {passwordRules.special ? <Check size={12} className="text-emerald-400" /> : <XIcon size={12} className="text-white/20" />}
+                  <span className={passwordRules.special ? "text-emerald-400/80" : "text-white/40"}>Contains a special character</span>
+                </div>
+              </div>
+            )}
+
+            {authError && (
+              <div className="flex items-center gap-2 text-red-400 text-xs bg-red-500/10 border border-red-500/20 p-2.5 rounded-lg animate-fade-in">
+                <AlertCircle size={14} className="shrink-0" />
+                <span>{authError}</span>
+              </div>
+            )}
+            
+            <button type="submit" className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-2.5 rounded-lg transition-colors shadow-lg shadow-indigo-500/20">
               {authMode === 'login' ? 'Sign In' : 'Create Account'}
             </button>
             <p className="text-center text-xs text-white/40 mt-4">
               {authMode === 'login' ? "Don't have an account? " : "Already have an account? "}
-              <button type="button" onClick={() => setAuthMode(authMode === 'login' ? 'register' : 'login')} className="text-indigo-400 hover:underline">
+              <button type="button" onClick={() => {
+                setAuthMode(authMode === 'login' ? 'register' : 'login');
+                setAuthError(null);
+                setEmailError(false);
+                setPasswordError(false);
+              }} className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
                 {authMode === 'login' ? 'Register' : 'Sign In'}
               </button>
             </p>
@@ -158,90 +240,113 @@ export default function Dashboard() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* ── Header ────────────────────────────────────────────────── */}
-        <header className="flex items-start justify-between mb-10">
+        <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 sm:mb-10 gap-6">
           <div className="flex items-center gap-4">
             <div className="relative">
               <div className="absolute inset-0 rounded-2xl bg-indigo-500/30 blur-lg scale-110" />
-              <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+              <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
                 <Shield size={24} className="text-white" />
               </div>
             </div>
             <div>
-              <h1 className="text-2xl font-bold gradient-text tracking-tight">FiduScan</h1>
-              <p className="text-xs text-white/35 font-medium tracking-wider uppercase mt-0.5">
-                AI Forensic Detection System · Phase 3 MVP
+              <h1 className="text-xl sm:text-2xl font-bold gradient-text tracking-tight">FiduScan</h1>
+              <p className="text-[10px] sm:text-xs text-white/35 font-medium tracking-wider uppercase mt-0.5">
+                AI Forensic Detection System
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-6">
-            <div className="flex bg-white/[0.04] rounded-lg p-1 border border-white/10">
+          <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
+            <div className="flex bg-white/[0.04] rounded-lg p-1 border border-white/10 w-full sm:w-auto overflow-x-auto hide-scrollbar">
               <button 
-                onClick={() => { setModality('image'); handleReset(); }} 
-                className={`px-3 py-1.5 text-xs rounded-md transition-colors ${modality === 'image' ? 'bg-indigo-500/20 text-indigo-300 font-bold' : 'text-white/50 hover:text-white/80'}`}
+                onClick={() => setActiveTab('scanner')} 
+                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 text-xs rounded-md transition-colors whitespace-nowrap ${activeTab === 'scanner' ? 'bg-indigo-500/20 text-indigo-300 font-bold' : 'text-white/50 hover:text-white/80'}`}
               >
-                Image
+                <LayoutDashboard size={14} /> Scanner
               </button>
               <button 
-                onClick={() => { setModality('audio'); handleReset(); }} 
-                className={`px-3 py-1.5 text-xs rounded-md transition-colors ${modality === 'audio' ? 'bg-indigo-500/20 text-indigo-300 font-bold' : 'text-white/50 hover:text-white/80'}`}
+                onClick={() => setActiveTab('history')} 
+                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 text-xs rounded-md transition-colors whitespace-nowrap ${activeTab === 'history' ? 'bg-indigo-500/20 text-indigo-300 font-bold' : 'text-white/50 hover:text-white/80'}`}
               >
-                Audio (MVP)
-              </button>
-              <button 
-                onClick={() => { setModality('video'); handleReset(); }} 
-                className={`px-3 py-1.5 text-xs rounded-md transition-colors ${modality === 'video' ? 'bg-indigo-500/20 text-indigo-300 font-bold' : 'text-white/50 hover:text-white/80'}`}
-              >
-                Video (MVP)
+                <History size={14} /> History
               </button>
             </div>
-
-            {/* System status indicator */}
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/08">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-50" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-              </span>
-              <span className="text-xs text-white/50 font-medium">System Online</span>
-            </div>
-
-            {state === 'result' && (
-              <button
-                id="reset-btn"
-                onClick={handleReset}
-                className="btn-ghost flex items-center gap-2 px-4 py-2"
-              >
-                <RotateCcw size={14} />
-                <span>New Scan</span>
-              </button>
-            )}
             
-            <button onClick={handleLogout} className="btn-ghost flex items-center gap-2 px-3 py-2 text-white/50 hover:text-white/80 transition-colors">
+            <button onClick={handleLogout} className="btn-ghost flex items-center justify-center gap-2 px-3 py-2 text-white/50 hover:text-white/80 transition-colors w-full sm:w-auto">
               <LogOut size={14} />
-              <span className="hidden sm:inline text-xs">Logout</span>
+              <span className="text-xs">Logout</span>
             </button>
           </div>
         </header>
 
-        {/* ── Stats Bar ─────────────────────────────────────────────── */}
-        <div className="grid grid-cols-3 gap-3 mb-8">
-          {[
-            { label: 'Model', value: modality === 'image' ? 'EfficientNet-B0' : modality === 'audio' ? 'Audio EfficientNet' : 'Multimodal Aggregation', icon: <Activity size={14} /> },
-            { label: 'Classes', value: 'Binary (2)', icon: <Scan size={14} /> },
-            { label: 'Input', value: modality === 'image' ? '224 × 224 px' : modality === 'audio' ? 'Log-Mel Spec (1x128xT)' : 'Multi-track', icon: <Shield size={14} /> },
-          ].map((stat) => (
-            <div key={stat.label} className="glass-card px-4 py-3 flex items-center gap-3">
-              <span className="text-indigo-400/60">{stat.icon}</span>
-              <div>
-                <p className="text-[10px] text-white/30 uppercase tracking-wider font-semibold">{stat.label}</p>
-                <p className="text-sm font-semibold text-white/80 font-mono">{stat.value}</p>
+        {activeTab === 'history' ? (
+          <HistoryPanel />
+        ) : (
+          <>
+            {/* ── Scanner Controls & Stats ─────────────────────────────────────────────── */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+              <div className="flex bg-white/[0.04] rounded-lg p-1 border border-white/10 overflow-x-auto w-full sm:w-auto hide-scrollbar">
+                <button 
+                  onClick={() => { setModality('image'); handleReset(); }} 
+                  className={`flex-1 sm:flex-none px-4 py-2 text-xs rounded-md transition-colors whitespace-nowrap ${modality === 'image' ? 'bg-indigo-500/20 text-indigo-300 font-bold' : 'text-white/50 hover:text-white/80'}`}
+                >
+                  Image
+                </button>
+                <button 
+                  onClick={() => { setModality('audio'); handleReset(); }} 
+                  className={`flex-1 sm:flex-none px-4 py-2 text-xs rounded-md transition-colors whitespace-nowrap ${modality === 'audio' ? 'bg-indigo-500/20 text-indigo-300 font-bold' : 'text-white/50 hover:text-white/80'}`}
+                >
+                  Audio (MVP)
+                </button>
+                <button 
+                  onClick={() => { setModality('video'); handleReset(); }} 
+                  className={`flex-1 sm:flex-none px-4 py-2 text-xs rounded-md transition-colors whitespace-nowrap ${modality === 'video' ? 'bg-indigo-500/20 text-indigo-300 font-bold' : 'text-white/50 hover:text-white/80'}`}
+                >
+                  Video (MVP)
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto">
+                <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-white/[0.04] border border-white/08">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-50" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                  </span>
+                  <span className="text-xs text-white/50 font-medium">System Online</span>
+                </div>
+
+                {state === 'result' && (
+                  <button
+                    id="reset-btn"
+                    onClick={handleReset}
+                    className="btn-ghost flex items-center justify-center gap-2 px-4 py-2"
+                  >
+                    <RotateCcw size={14} />
+                    <span className="text-xs">New Scan</span>
+                  </button>
+                )}
               </div>
             </div>
-          ))}
-        </div>
 
-        {/* ── Main Content ───────────────────────────────────────────── */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
+            {/* ── Stats Bar ─────────────────────────────────────────────── */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
+              {[
+                { label: 'Model', value: modality === 'image' ? 'EfficientNet-B0' : modality === 'audio' ? 'Audio EfficientNet' : 'Multimodal Aggregation', icon: <Activity size={14} /> },
+                { label: 'Classes', value: 'Binary (2)', icon: <Scan size={14} /> },
+                { label: 'Input', value: modality === 'image' ? '224 × 224 px' : modality === 'audio' ? 'Log-Mel Spec (1x128xT)' : 'Multi-track', icon: <Shield size={14} /> },
+              ].map((stat) => (
+                <div key={stat.label} className="glass-card px-4 py-3 flex items-center gap-3">
+                  <span className="text-indigo-400/60">{stat.icon}</span>
+                  <div className="overflow-hidden">
+                    <p className="text-[10px] text-white/30 uppercase tracking-wider font-semibold">{stat.label}</p>
+                    <p className="text-sm font-semibold text-white/80 font-mono truncate">{stat.value}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* ── Main Content ───────────────────────────────────────────── */}
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
 
           {/* Left Column — Upload + Description */}
           <div className="space-y-6">
@@ -261,6 +366,7 @@ export default function Dashboard() {
               <UploadZone
                 onFileSelect={handleFileSelect}
                 isAnalyzing={state === 'analyzing'}
+                status={state}
                 mode={modality}
               />
 
@@ -343,12 +449,13 @@ export default function Dashboard() {
                 <MetadataViewer metadata={(result as DetectionResult).metadata} />
               </>
             ) : state === 'analyzing' ? (
-              <AnalyzingPlaceholder />
+              <ScanResultSkeleton />
             ) : (
               <IdlePlaceholder />
             )}
           </div>
-        </div>
+        </>
+        )}
 
         {/* ── Footer ────────────────────────────────────────────────── */}
         <footer className="mt-12 pt-6 border-t border-white/[0.04] flex items-center justify-between text-xs text-white/25">
@@ -374,31 +481,6 @@ function IdlePlaceholder() {
         <p className="text-xs text-white/20 max-w-[200px] leading-relaxed">
           Upload an image on the left to run forensic analysis
         </p>
-      </div>
-    </div>
-  );
-}
-
-function AnalyzingPlaceholder() {
-  return (
-    <div className="glass-card p-8 flex flex-col items-center justify-center min-h-[320px] gap-6">
-      {/* Concentric pulse rings */}
-      <div className="relative flex items-center justify-center">
-        <div className="absolute w-24 h-24 rounded-full border border-indigo-500/20 animate-ping" style={{ animationDuration: '2s' }} />
-        <div className="absolute w-16 h-16 rounded-full border border-indigo-500/30 animate-ping" style={{ animationDuration: '1.5s' }} />
-        <div className="w-10 h-10 rounded-full bg-indigo-500/30 border border-indigo-500/50 flex items-center justify-center">
-          <Scan size={18} className="text-indigo-300" />
-        </div>
-      </div>
-      <div className="text-center">
-        <p className="text-sm font-semibold text-white/60 mb-1">Analyzing Image</p>
-        <p className="text-xs text-white/30">Running EfficientNet-B0 inference…</p>
-      </div>
-      {/* Scanning progress */}
-      <div className="w-full max-w-[180px]">
-        <div className="h-1 rounded-full bg-white/[0.05] overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full animate-pulse" style={{ width: '70%' }} />
-        </div>
       </div>
     </div>
   );

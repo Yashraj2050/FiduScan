@@ -1,12 +1,13 @@
 'use client';
 
-import { useCallback, useState } from 'react';
-import { Upload, ImageIcon, X, AlertCircle } from 'lucide-react';
+import { useCallback, useState, useEffect } from 'react';
+import { Upload, ImageIcon, X, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { formatBytes } from '@/lib/api';
 
 interface UploadZoneProps {
   onFileSelect: (file: File) => void;
   isAnalyzing: boolean;
+  status?: 'idle' | 'analyzing' | 'result' | 'error';
   mode?: 'image' | 'audio' | 'video';
 }
 
@@ -15,13 +16,27 @@ const ACCEPTED_AUDIO_TYPES = ['audio/wav', 'audio/mpeg', 'audio/mp3', 'audio/mp4
 const ACCEPTED_VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/x-matroska'];
 const MAX_SIZE_MB = 20;
 
-export default function UploadZone({ onFileSelect, isAnalyzing, mode = 'image' }: UploadZoneProps) {
+export default function UploadZone({ onFileSelect, isAnalyzing, status = 'idle', mode = 'image' }: UploadZoneProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
+  
+  // Progress states
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
 
   const acceptedTypes = mode === 'image' ? ACCEPTED_IMAGE_TYPES : mode === 'audio' ? ACCEPTED_AUDIO_TYPES : ACCEPTED_VIDEO_TYPES;
+
+  // Clear file when changing modes or external reset
+  useEffect(() => {
+    if (status === 'idle' && !isUploading) {
+      setPreview(null);
+      setSelectedFile(null);
+      setError(null);
+      setUploadProgress(0);
+    }
+  }, [status, isUploading]);
 
   const processFile = useCallback((file: File) => {
     setError(null);
@@ -45,22 +60,42 @@ export default function UploadZone({ onFileSelect, isAnalyzing, mode = 'image' }
       reader.onloadend = () => setPreview(reader.result as string);
       reader.readAsDataURL(file);
     } else {
-      setPreview('audio_placeholder');
+      setPreview('media_placeholder');
     }
-    onFileSelect(file);
+
+    // Simulate upload progress
+    setIsUploading(true);
+    setUploadProgress(0);
+    
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.floor(Math.random() * 15) + 5;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(interval);
+        setTimeout(() => {
+          setIsUploading(false);
+          onFileSelect(file);
+        }, 500);
+      }
+      setUploadProgress(progress);
+    }, 150);
+
   }, [onFileSelect, acceptedTypes, mode]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
+    if (isAnalyzing || isUploading || status === 'result') return;
     const file = e.dataTransfer.files[0];
     if (file) processFile(file);
-  }, [processFile]);
+  }, [processFile, isAnalyzing, isUploading, status]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
+    if (isAnalyzing || isUploading || status === 'result') return;
     setIsDragging(true);
-  }, []);
+  }, [isAnalyzing, isUploading, status]);
 
   const handleDragLeave = useCallback(() => {
     setIsDragging(false);
@@ -73,14 +108,16 @@ export default function UploadZone({ onFileSelect, isAnalyzing, mode = 'image' }
 
   const handleClear = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
+    if (isAnalyzing || isUploading) return;
     setPreview(null);
     setSelectedFile(null);
     setError(null);
-  }, []);
+    setUploadProgress(0);
+  }, [isAnalyzing, isUploading]);
 
   return (
     <div className="w-full">
-      <label htmlFor="image-upload" className="block cursor-pointer">
+      <label htmlFor={isAnalyzing || isUploading || status === 'result' ? undefined : "image-upload"} className={`block ${isAnalyzing || isUploading || status === 'result' ? 'cursor-default' : 'cursor-pointer'}`}>
         <div
           id="upload-zone"
           className={`upload-zone min-h-[280px] flex flex-col items-center justify-center p-8 transition-all duration-300 ${
@@ -93,8 +130,8 @@ export default function UploadZone({ onFileSelect, isAnalyzing, mode = 'image' }
           {preview ? (
             /* ── Preview State ─────────────────────────────────────── */
             <div className="relative w-full flex flex-col items-center gap-4">
-              <div className="relative rounded-xl overflow-hidden border border-white/10 max-h-[200px] flex items-center justify-center bg-black/20">
-                {mode === 'image' && preview !== 'audio_placeholder' && preview !== 'video_placeholder' ? (
+              <div className="relative rounded-xl overflow-hidden border border-white/10 max-h-[200px] w-full flex items-center justify-center bg-black/20">
+                {mode === 'image' && preview !== 'media_placeholder' ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     src={preview}
@@ -109,18 +146,65 @@ export default function UploadZone({ onFileSelect, isAnalyzing, mode = 'image' }
                     </span>
                   </div>
                 )}
-                {isAnalyzing && (
-                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="relative flex h-8 w-8">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-50"></span>
-                        <span className="relative inline-flex rounded-full h-8 w-8 bg-indigo-500"></span>
-                      </div>
-                      <span className="text-xs text-white/80 font-medium mt-1">Analyzing...</span>
+
+                {/* Overlays for different states */}
+                {(isUploading || isAnalyzing || status === 'result' || status === 'error') && (
+                  <div className="absolute inset-0 bg-black/70 flex items-center justify-center backdrop-blur-sm animate-fade-in">
+                    <div className="flex flex-col items-center gap-3 w-full max-w-[200px]">
+                      
+                      {isUploading && (
+                        <>
+                          <div className="flex justify-between w-full text-xs text-white/80 font-medium mb-1">
+                            <span>Uploading</span>
+                            <span>{uploadProgress}%</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-indigo-500 rounded-full transition-all duration-200" 
+                              style={{ width: `${uploadProgress}%` }}
+                            />
+                          </div>
+                        </>
+                      )}
+
+                      {!isUploading && status === 'analyzing' && (
+                        <>
+                          <div className="relative flex h-10 w-10 mb-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-50"></span>
+                            <span className="relative inline-flex rounded-full h-10 w-10 bg-indigo-500 items-center justify-center">
+                              <Upload size={18} className="text-white animate-pulse" />
+                            </span>
+                          </div>
+                          <span className="text-sm text-white/90 font-medium">Processing...</span>
+                          <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden mt-1">
+                            <div className="h-full w-1/2 bg-indigo-500 rounded-full animate-progress" />
+                          </div>
+                        </>
+                      )}
+
+                      {!isUploading && status === 'result' && (
+                        <div className="flex flex-col items-center gap-2 animate-bounce-in">
+                          <div className="w-12 h-12 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
+                            <CheckCircle2 size={24} className="text-emerald-400" />
+                          </div>
+                          <span className="text-sm text-emerald-400 font-medium">Analysis Complete</span>
+                        </div>
+                      )}
+
+                      {!isUploading && status === 'error' && (
+                        <div className="flex flex-col items-center gap-2 animate-bounce-in">
+                          <div className="w-12 h-12 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center">
+                            <X size={24} className="text-red-400" />
+                          </div>
+                          <span className="text-sm text-red-400 font-medium">Failed</span>
+                        </div>
+                      )}
+
                     </div>
                   </div>
                 )}
-                {!isAnalyzing && (
+
+                {!isAnalyzing && !isUploading && status !== 'result' && status !== 'error' && (
                   <button
                     onClick={handleClear}
                     className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/60 hover:bg-black/80 text-white/70 hover:text-white transition-all"
@@ -140,7 +224,7 @@ export default function UploadZone({ onFileSelect, isAnalyzing, mode = 'image' }
                 </div>
               )}
 
-              {!isAnalyzing && (
+              {status !== 'result' && status !== 'error' && !isUploading && !isAnalyzing && (
                 <p className="text-xs text-indigo-400/70 mt-1">
                   Click or drop a new {mode} to replace
                 </p>
@@ -151,7 +235,7 @@ export default function UploadZone({ onFileSelect, isAnalyzing, mode = 'image' }
             <div className="flex flex-col items-center gap-5 select-none">
               <div className="relative">
                 <div className="absolute inset-0 rounded-full bg-indigo-500/20 blur-xl scale-150"></div>
-                <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center">
+                <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center group-hover:scale-105 transition-transform">
                   <Upload size={28} className="text-indigo-400" />
                 </div>
               </div>
@@ -168,11 +252,11 @@ export default function UploadZone({ onFileSelect, isAnalyzing, mode = 'image' }
                 </p>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-3">
                 {(mode === 'image' ? ['JPEG', 'PNG', 'WEBP', 'BMP'] : mode === 'audio' ? ['WAV', 'MP3', 'M4A'] : ['MP4', 'MOV', 'AVI', 'MKV']).map((fmt) => (
                   <span
                     key={fmt}
-                    className="px-2.5 py-1 rounded-md text-[11px] font-mono font-medium text-white/40 bg-white/5 border border-white/08"
+                    className="px-2.5 py-1 rounded-md text-[10px] sm:text-[11px] font-mono font-medium text-white/40 bg-white/5 border border-white/08"
                   >
                     .{fmt.toLowerCase()}
                   </span>
@@ -183,14 +267,16 @@ export default function UploadZone({ onFileSelect, isAnalyzing, mode = 'image' }
         </div>
       </label>
 
-      <input
-        id="image-upload"
-        type="file"
-        accept={acceptedTypes.join(',')}
-        className="sr-only"
-        onChange={handleInputChange}
-        disabled={isAnalyzing}
-      />
+      {(!isAnalyzing && !isUploading && status !== 'result') && (
+        <input
+          id="image-upload"
+          type="file"
+          accept={acceptedTypes.join(',')}
+          className="sr-only"
+          onChange={handleInputChange}
+          disabled={isAnalyzing || isUploading || status === 'result'}
+        />
+      )}
 
       {error && (
         <div className="mt-3 flex items-center gap-2 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm animate-fade-in">
