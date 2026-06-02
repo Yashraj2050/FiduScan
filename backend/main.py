@@ -26,7 +26,7 @@ from utils.logger import setup_logger
 logger = setup_logger("fiduscan.main")
 
 ALLOWED_ORIGINS = os.environ.get(
-    "CORS_ORIGINS", "http://localhost:3000,https://fiduscan.vercel.app"
+    "CORS_ORIGINS", "http://localhost:3000,https://fiduscan.vercel.app,https://frontend-nu-ten-16.vercel.app"
 ).split(",")
 
 
