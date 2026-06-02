@@ -15,10 +15,11 @@ from utils.file_validator import validate_image_upload
 from utils.logger import setup_logger
 from services.inference_service import InferenceService
 from services.metadata_service import extract_metadata
+from services.limits import check_usage_limit
 from middleware.rate_limiter import limiter
 from auth import get_current_user
 from database import get_db
-from models import User, Scan, AuditLog
+from models import User, Scan, AuditLog, UsageTracking
 
 logger = setup_logger("fiduscan.detect")
 router = APIRouter()
@@ -60,8 +61,10 @@ async def detect_image(
 ):
     request_id = str(uuid.uuid4())
     start_time = time.perf_counter()
-
     logger.info(f"[{request_id}] Incoming detection request — file: {file.filename}")
+
+    # ── 0. Check Usage Limits ──────────────────────────────────────────────────
+    check_usage_limit(db, current_user.user_id, "image")
 
     # ── 1. Validate file ──────────────────────────────────────────────────────
     image_bytes = await file.read()
@@ -103,6 +106,14 @@ async def detect_image(
     
     log = AuditLog(user_id=current_user.user_id, action="INFERENCE_IMAGE", metadata_json={"scan_id": request_id})
     db.add(log)
+    
+    usage = db.query(UsageTracking).filter(UsageTracking.user_id == current_user.user_id).first()
+    if not usage:
+        from datetime import datetime
+        usage = UsageTracking(user_id=current_user.user_id, reset_date=datetime.now())
+        db.add(usage)
+    usage.image_scans += 1
+    
     db.commit()
 
     return DetectionResult(

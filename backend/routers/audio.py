@@ -9,10 +9,11 @@ from sqlalchemy.orm import Session
 
 from utils.logger import setup_logger
 from services.audio_service import AudioInferenceService
+from services.limits import check_usage_limit
 from middleware.rate_limiter import limiter
 from auth import get_current_user
 from database import get_db
-from models import User, Scan, AuditLog
+from models import User, Scan, AuditLog, UsageTracking
 
 logger = setup_logger("fiduscan.audio")
 router = APIRouter()
@@ -50,6 +51,9 @@ async def detect_audio(
 
     logger.info(f"[{request_id}] Incoming audio detection request — file: {file.filename}")
 
+    # ── 0. Check Usage Limits ──────────────────────────────────────────────────
+    check_usage_limit(db, current_user.user_id, "audio")
+
     try:
         audio_bytes = await file.read()
     except Exception:
@@ -82,6 +86,14 @@ async def detect_audio(
     
     log = AuditLog(user_id=current_user.user_id, action="INFERENCE_AUDIO", metadata_json={"scan_id": request_id})
     db.add(log)
+    
+    usage = db.query(UsageTracking).filter(UsageTracking.user_id == current_user.user_id).first()
+    if not usage:
+        from datetime import datetime
+        usage = UsageTracking(user_id=current_user.user_id, reset_date=datetime.now())
+        db.add(usage)
+    usage.audio_scans += 1
+    
     db.commit()
 
     return AudioDetectionResult(

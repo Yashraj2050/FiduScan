@@ -1,8 +1,37 @@
 'use client';
 
+import { useState } from 'react';
 import { CreditCard, CheckCircle2, Zap, ArrowRight, Clock, Receipt } from 'lucide-react';
+import { createCheckoutSession, createPortalSession } from '@/lib/api';
 
 export default function BillingDashboard() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleCheckout = async (plan: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await createCheckoutSession(plan);
+      window.location.href = data.url;
+    } catch (err: any) {
+      setError(err.message || 'Failed to initialize checkout');
+      setLoading(false);
+    }
+  };
+
+  const handlePortal = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await createPortalSession();
+      window.location.href = data.url;
+    } catch (err: any) {
+      setError(err.message || 'Failed to open billing portal');
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center gap-4 mb-6">
@@ -14,6 +43,12 @@ export default function BillingDashboard() {
           <p className="text-sm text-white/50">Manage your subscription and payment methods</p>
         </div>
       </div>
+
+      {error && (
+        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+          {error}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Current Plan Card */}
@@ -47,13 +82,32 @@ export default function BillingDashboard() {
             ))}
           </div>
 
-          <button className="w-full py-2.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 font-medium transition-colors border border-indigo-500/20 flex items-center justify-center gap-2">
+          <button 
+            onClick={() => handlePortal()}
+            disabled={loading}
+            className="w-full py-2.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 font-medium transition-colors border border-indigo-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
+          >
             Manage Subscription
             <ArrowRight size={16} />
           </button>
         </div>
 
         <div className="space-y-6">
+          {/* Upgrade Card */}
+          <div className="glass-card p-6">
+            <h4 className="text-sm font-semibold text-white/80 mb-4">Need more capacity?</h4>
+            <div className="p-4 rounded-lg bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30">
+              <h5 className="font-bold text-white mb-1">Enterprise</h5>
+              <p className="text-xs text-white/60 mb-4">Unlimited scans, custom SLAs, and priority support.</p>
+              <button 
+                onClick={() => handleCheckout('enterprise')}
+                disabled={loading}
+                className="w-full py-2 rounded bg-indigo-500 hover:bg-indigo-600 text-white font-medium text-sm transition-colors disabled:opacity-50"
+              >
+                Upgrade to Enterprise
+              </button>
+            </div>
+          </div>
           {/* Payment Method */}
           <div className="glass-card p-6">
             <h4 className="text-sm font-semibold text-white/80 mb-4">Payment Method</h4>

@@ -138,3 +138,46 @@ export async function revokeApiKey(id: string): Promise<void> {
     throw new Error(error.detail || `HTTP ${response.status}`);
   }
 }
+
+export async function createCheckoutSession(plan: string): Promise<{ url: string }> {
+  const response = await fetch(`${API_BASE}/api/v1/billing/create-checkout-session`, {
+    method: 'POST',
+    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ plan }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
+    throw new Error(error.detail || `HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function createPortalSession(): Promise<{ url: string }> {
+  const response = await fetch(`${API_BASE}/api/v1/billing/create-portal-session`, {
+    method: 'POST',
+    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({}),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
+    throw new Error(error.detail || `HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function getUsage(): Promise<any> {
+  const response = await fetch(`${API_BASE}/api/v1/billing/usage`, {
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
+    throw new Error(error.detail || `HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
