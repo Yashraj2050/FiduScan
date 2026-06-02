@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { Shield, Scan, RotateCcw, Activity, LogOut, User as UserIcon, Eye, EyeOff, Check, X as XIcon, AlertCircle, History, LayoutDashboard } from 'lucide-react';
+import { Shield, Scan, RotateCcw, Activity, LogOut, User as UserIcon, Eye, EyeOff, Check, X as XIcon, AlertCircle, History, LayoutDashboard, Settings } from 'lucide-react';
 import UploadZone from '@/components/UploadZone';
 import ResultCard from '@/components/ResultCard';
 import { ScanResultSkeleton } from '@/components/Skeletons';
@@ -9,6 +9,7 @@ import MetadataViewer from '@/components/MetadataViewer';
 import HeatmapViewer from '@/components/HeatmapViewer';
 import LandingDemo from '@/components/LandingDemo';
 import HistoryPanel from '@/components/HistoryPanel';
+import SettingsHub from '@/components/SettingsHub';
 import { detectImage, detectAudio, detectVideo } from '@/lib/api';
 import { login, register, getToken, removeToken } from '@/lib/auth';
 import { DetectionResult, AudioDetectionResult, VideoDetectionResult } from '@/types';
@@ -19,7 +20,7 @@ type Modality = 'image' | 'audio' | 'video';
 export default function Dashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
-  const [activeTab, setActiveTab] = useState<'scanner' | 'history'>('scanner');
+  const [activeTab, setActiveTab] = useState<'scanner' | 'history' | 'settings'>('scanner');
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -270,6 +271,12 @@ export default function Dashboard() {
               >
                 <History size={14} /> History
               </button>
+              <button 
+                onClick={() => setActiveTab('settings')} 
+                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 text-xs rounded-md transition-colors whitespace-nowrap ${activeTab === 'settings' ? 'bg-indigo-500/20 text-indigo-300 font-bold' : 'text-white/50 hover:text-white/80'}`}
+              >
+                <Settings size={14} /> Settings
+              </button>
             </div>
             
             <button onClick={handleLogout} className="btn-ghost flex items-center justify-center gap-2 px-3 py-2 text-white/50 hover:text-white/80 transition-colors w-full sm:w-auto">
@@ -281,6 +288,8 @@ export default function Dashboard() {
 
         {activeTab === 'history' ? (
           <HistoryPanel />
+        ) : activeTab === 'settings' ? (
+          <SettingsHub />
         ) : (
           <>
             {/* ── Scanner Controls & Stats ─────────────────────────────────────────────── */}

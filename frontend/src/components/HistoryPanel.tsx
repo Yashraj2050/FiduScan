@@ -5,35 +5,51 @@ import { Search, Filter, ShieldCheck, ShieldAlert, Image as ImageIcon, Music, Vi
 
 type Modality = 'image' | 'audio' | 'video';
 type ResultType = 'authentic' | 'suspicious' | 'fake';
-
-interface HistoryItem {
-  id: string;
-  filename: string;
-  modality: Modality;
-  result: ResultType;
-  confidence: number;
-  date: string;
-}
-
-const mockHistory: HistoryItem[] = [
-  { id: '1', filename: 'evidence_04.jpg', modality: 'image', result: 'authentic', confidence: 0.98, date: '2026-06-02T10:30:00Z' },
-  { id: '2', filename: 'voice_note_leaked.m4a', modality: 'audio', result: 'fake', confidence: 0.92, date: '2026-06-01T15:45:00Z' },
-  { id: '3', filename: 'cctv_footage_raw.mp4', modality: 'video', result: 'authentic', confidence: 0.88, date: '2026-05-30T09:15:00Z' },
-  { id: '4', filename: 'profile_pic_gen.png', modality: 'image', result: 'fake', confidence: 0.99, date: '2026-05-29T14:20:00Z' },
-  { id: '5', filename: 'interview_clip.mov', modality: 'video', result: 'suspicious', confidence: 0.65, date: '2026-05-28T11:10:00Z' },
-  { id: '6', filename: 'background_noise.wav', modality: 'audio', result: 'authentic', confidence: 0.95, date: '2026-05-27T16:55:00Z' },
-];
+import { useEffect } from 'react';
+import { getHistory } from '@/lib/api';
+import { HistoryScan } from '@/types';
+import { HistorySkeleton } from './Skeletons';
 
 export default function HistoryPanel() {
   const [searchQuery, setSearchQuery] = useState('');
   const [modalityFilter, setModalityFilter] = useState<Modality | 'all'>('all');
   const [resultFilter, setResultFilter] = useState<ResultType | 'all'>('all');
   
-  const filteredHistory = mockHistory.filter(item => {
-    const matchesSearch = item.filename.toLowerCase().includes(searchQuery.toLowerCase()) || item.id.includes(searchQuery);
-    const matchesModality = modalityFilter === 'all' || item.modality === modalityFilter;
-    const matchesResult = resultFilter === 'all' || item.result === resultFilter;
-    return matchesSearch && matchesModality && matchesResult;
+  const [history, setHistory] = useState<HistoryScan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Pagination
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [hasNext, setHasNext] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchHistory = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await getHistory(page, modalityFilter, resultFilter);
+        if (isMounted) {
+          setHistory(data.items);
+          setTotalPages(data.pages);
+          setHasNext(data.has_next);
+        }
+      } catch (err: any) {
+        if (isMounted) setError(err.message || 'Failed to load history');
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    fetchHistory();
+    return () => { isMounted = false; };
+  }, [page, modalityFilter, resultFilter]);
+
+  // Client-side search (since API doesn't support search yet)
+  const filteredHistory = history.filter(item => {
+    return item.filename.toLowerCase().includes(searchQuery.toLowerCase()) || item.id.includes(searchQuery);
   });
 
   return (
@@ -84,7 +100,15 @@ export default function HistoryPanel() {
 
       {/* ── History List ───────────────────────────────────────────── */}
       <div className="glass-card overflow-hidden">
-        {filteredHistory.length === 0 ? (
+        {loading ? (
+          <HistorySkeleton />
+        ) : error ? (
+          <div className="p-12 flex flex-col items-center justify-center text-center">
+            <ShieldAlert size={32} className="text-red-400 mb-4" />
+            <p className="text-white/80 font-medium">Error loading history</p>
+            <p className="text-sm text-white/40 mt-1">{error}</p>
+          </div>
+        ) : filteredHistory.length === 0 ? (
           <div className="p-12 flex flex-col items-center justify-center text-center">
             <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
               <Search size={24} className="text-white/20" />
@@ -98,14 +122,14 @@ export default function HistoryPanel() {
               <div key={item.id} className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-white/[0.02] transition-colors group">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center shrink-0 border border-white/10">
-                    {item.modality === 'image' ? <ImageIcon size={18} className="text-indigo-400" /> : 
-                     item.modality === 'audio' ? <Music size={18} className="text-purple-400" /> : 
+                    {item.type === 'image' ? <ImageIcon size={18} className="text-indigo-400" /> : 
+                     item.type === 'audio' ? <Music size={18} className="text-purple-400" /> : 
                      <Video size={18} className="text-emerald-400" />}
                   </div>
                   <div>
                     <h4 className="text-sm font-medium text-white/90 truncate max-w-[200px] sm:max-w-[300px]">{item.filename}</h4>
                     <div className="flex items-center gap-2 text-xs text-white/40 mt-1">
-                      <span className="uppercase tracking-wider">{item.modality}</span>
+                      <span className="uppercase tracking-wider">{item.type}</span>
                       <span>&bull;</span>
                       <span className="font-mono">{new Date(item.date).toLocaleDateString()}</span>
                     </div>
@@ -132,6 +156,29 @@ export default function HistoryPanel() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {!loading && !error && totalPages > 1 && (
+          <div className="p-4 border-t border-white/05 flex items-center justify-between">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-4 py-2 text-sm text-white/60 hover:text-white hover:bg-white/5 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Previous
+            </button>
+            <span className="text-sm text-white/40">
+              Page {page} of {totalPages}
+            </span>
+            <button
+              onClick={() => setPage(p => p + 1)}
+              disabled={!hasNext}
+              className="px-4 py-2 text-sm text-white/60 hover:text-white hover:bg-white/5 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Next
+            </button>
           </div>
         )}
       </div>

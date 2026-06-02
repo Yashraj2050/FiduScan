@@ -116,3 +116,15 @@ class UsageTracking(Base):
     api_calls = Column(Integer, default=0)
     storage_used = Column(Integer, default=0)
     reset_date = Column(DateTime(timezone=True), nullable=False)
+
+class DeveloperApiKey(Base):
+    __tablename__ = "developer_api_keys"
+    id = Column(String, primary_key=True, index=True)
+    user_id = Column(String, ForeignKey("users.user_id"), nullable=False)
+    key_hash = Column(String, nullable=False)
+    name = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    last_used_at = Column(DateTime(timezone=True), nullable=True)
+    revoked = Column(Integer, default=0)
+
+    user = relationship("User")

@@ -70,3 +70,35 @@ export interface HealthStatus {
   model_loaded: boolean;
   platform: string;
 }
+
+export interface HistoryScan {
+  id: string;
+  filename: string;
+  type: string;
+  result: string;
+  confidence: number;
+  date: string;
+}
+
+export interface HistoryPaginatedResponse {
+  items: HistoryScan[];
+  total: number;
+  page: number;
+  pages: number;
+  has_next: boolean;
+}
+
+export interface ApiKeyCreateResponse {
+  id: string;
+  name: string;
+  api_key: string;
+  created_at: string;
+}
+
+export interface ApiKeyResponse {
+  id: string;
+  name: string;
+  created_at: string;
+  last_used_at: string | null;
+  revoked: boolean;
+}

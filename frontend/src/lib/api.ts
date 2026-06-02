@@ -1,4 +1,4 @@
-import { DetectionResult, HealthStatus, AudioDetectionResult, VideoDetectionResult } from '@/types';
+import { DetectionResult, HealthStatus, AudioDetectionResult, VideoDetectionResult, HistoryPaginatedResponse, ApiKeyCreateResponse, ApiKeyResponse } from '@/types';
 import { getToken } from './auth';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -62,6 +62,26 @@ export async function detectVideo(file: File): Promise<VideoDetectionResult> {
   return response.json();
 }
 
+export async function getHistory(page: number = 1, type: string = 'all', result: string = 'all'): Promise<HistoryPaginatedResponse> {
+  const queryParams = new URLSearchParams({
+    page: page.toString(),
+  });
+  if (type !== 'all') queryParams.append('type', type);
+  if (result !== 'all') queryParams.append('result', result);
+
+  const response = await fetch(`${API_BASE}/api/v1/history?${queryParams.toString()}`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
+    throw new Error(error.detail || `HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
+
 export async function getHealth(): Promise<HealthStatus> {
   const response = await fetch(`${API_BASE}/api/v1/health`);
   if (!response.ok) throw new Error('Backend unreachable');
@@ -76,4 +96,45 @@ export function formatBytes(bytes: number): string {
 
 export function formatConfidence(value: number): string {
   return `${(value * 100).toFixed(2)}%`;
+}
+
+export async function createApiKey(name: string): Promise<ApiKeyCreateResponse> {
+  const response = await fetch(`${API_BASE}/api/v1/api-keys`, {
+    method: 'POST',
+    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
+    throw new Error(error.detail || `HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function listApiKeys(): Promise<ApiKeyResponse[]> {
+  const response = await fetch(`${API_BASE}/api/v1/api-keys`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
+    throw new Error(error.detail || `HTTP ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function revokeApiKey(id: string): Promise<void> {
+  const response = await fetch(`${API_BASE}/api/v1/api-keys/${id}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
+    throw new Error(error.detail || `HTTP ${response.status}`);
+  }
 }
