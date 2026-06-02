@@ -2,12 +2,16 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'FiduScan — AI Forensic Detection System',
+  title: 'FiduScan — AI Media Forensics',
   description:
-    'Anti-Gravity Phase 1: Detect AI-generated vs authentic images with confidence scoring, EXIF metadata analysis, and explainability heatmaps.',
-  keywords: ['AI detection', 'deepfake', 'forensic analysis', 'image authentication', 'FiduScan'],
-  authors: [{ name: 'Anti-Gravity Forensic System' }],
-  robots: 'noindex, nofollow',
+    'Detect AI-generated images, audio, and video with confidence scoring, EXIF metadata analysis, and explainability heatmaps. Protect your platform from synthetic media.',
+  keywords: ['AI detection', 'deepfake detection', 'media forensics', 'image authentication', 'synthetic media', 'FiduScan'],
+  authors: [{ name: 'FiduScan' }],
+  robots: 'index, follow',
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({
@@ -18,6 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

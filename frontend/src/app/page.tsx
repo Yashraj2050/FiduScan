@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { Shield, Scan, RotateCcw, Activity, LogOut, User as UserIcon, Eye, EyeOff, Check, X as XIcon, AlertCircle, History, LayoutDashboard, Settings } from 'lucide-react';
+import { Shield, Scan, RotateCcw, Activity, LogOut, Eye, EyeOff, Check, X as XIcon, AlertCircle, History, LayoutDashboard, Settings } from 'lucide-react';
 import UploadZone from '@/components/UploadZone';
 import ResultCard from '@/components/ResultCard';
 import { ScanResultSkeleton } from '@/components/Skeletons';
@@ -28,6 +28,10 @@ export default function Dashboard() {
   const [authError, setAuthError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
+  // A6: Forgot password state
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotSent, setForgotSent] = useState(false);
 
   const passwordRules = {
     length: password.length >= 8,
@@ -69,16 +73,25 @@ export default function Dashboard() {
         await register(email, password);
       }
       setIsAuthenticated(true);
-    } catch (err: any) {
-      setAuthError(err.message || 'Authentication failed');
+    } catch (err: unknown) {
+      setAuthError((err as Error).message || 'Authentication failed. Please try again.');
     }
   };
 
-  const handleLogout = () => {
+  // A6: Forgot password handler (entry point — full flow in Sprint B)
+  const handleForgotPassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Sends to reset flow — integration in Sprint B
+    setForgotSent(true);
+  };
+
+  const handleLogout = useCallback(() => {
     removeToken();
     setIsAuthenticated(false);
-    handleReset();
-  };
+    setState('idle');
+    setResult(null);
+    setErrorMsg(null);
+  }, []);
 
   const handleFileSelect = useCallback(async (file: File) => {
     setState('analyzing');
@@ -93,7 +106,7 @@ export default function Dashboard() {
         const audioData = await detectAudio(file);
         data = {
           ...audioData,
-          metadata: audioData.explanation_metadata, // map for MetadataViewer
+          metadata: audioData.explanation_metadata,
           heatmap_available: false,
           heatmap_b64: null
         } as unknown as DetectionResult;
@@ -107,7 +120,7 @@ export default function Dashboard() {
             "Metadata Score": `${(videoData.metadata_score * 100).toFixed(2)}% AI`,
             "Temporal Score": `${(videoData.temporal_score * 100).toFixed(2)}% AI`,
             "Explanation": videoData.explanation
-          }, // map for MetadataViewer
+          },
           heatmap_available: false,
           heatmap_b64: null
         } as unknown as DetectionResult;
@@ -115,12 +128,13 @@ export default function Dashboard() {
       
       setResult(data);
       setState('result');
-    } catch (err: any) {
-      if (err.message.includes('401')) {
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message.includes('401')) {
         handleLogout();
       }
-      const message = err instanceof Error ? err.message : 'Detection failed. Please try again.';
-      setErrorMsg(message);
+      const message = err instanceof Error ? err.message : 'Analysis failed. Please try again.';
+      const sanitized = message.replace(/localhost:\d+/g, 'the detection service');
+      setErrorMsg(sanitized);
       setState('error');
     }
   }, [modality]);
@@ -129,11 +143,72 @@ export default function Dashboard() {
     setState('idle');
     setResult(null);
     setErrorMsg(null);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!isAuthenticated) {
     if (!showAuth) {
-      return <LandingDemo onSignInClick={() => setShowAuth(true)} />;
+      return (
+        <LandingDemo
+          onSignInClick={() => { setAuthMode('login'); setShowAuth(true); }}
+          onRegisterClick={() => { setAuthMode('register'); setShowAuth(true); }}
+        />
+      );
+    }
+
+    // A6: Forgot password screen
+    if (showForgotPassword) {
+      return (
+        <main className="relative min-h-screen flex items-center justify-center bg-black px-4">
+          <div className="absolute -top-40 -left-40 w-[600px] h-[600px] max-w-full rounded-full bg-indigo-600/10 blur-[120px]" />
+          <div className="glass-card p-6 sm:p-8 w-full max-w-md z-10 animate-fade-in relative">
+            <button
+              onClick={() => { setShowForgotPassword(false); setForgotSent(false); setForgotEmail(''); }}
+              className="absolute top-4 right-4 text-white/40 hover:text-white transition-colors p-2"
+            >
+              <XIcon size={20} />
+            </button>
+            <div className="flex items-center gap-3 mb-6 justify-center">
+              <Shield size={24} className="text-indigo-400" />
+              <h1 className="text-xl font-bold text-white">Reset Password</h1>
+            </div>
+            {forgotSent ? (
+              <div className="text-center space-y-4">
+                <div className="w-14 h-14 rounded-full bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center mx-auto">
+                  <Check size={24} className="text-emerald-400" />
+                </div>
+                <p className="text-white/80 text-sm font-medium">Check your inbox</p>
+                <p className="text-white/40 text-xs leading-relaxed">
+                  If an account exists for <span className="text-white/60">{forgotEmail}</span>, a password reset link has been sent.
+                </p>
+                <button
+                  onClick={() => { setShowForgotPassword(false); setForgotSent(false); setForgotEmail(''); }}
+                  className="text-indigo-400 hover:text-indigo-300 text-sm font-medium transition-colors"
+                >
+                  Back to Sign In
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleForgotPassword} className="space-y-5">
+                <p className="text-white/50 text-sm text-center">Enter your email and we&apos;ll send you a reset link.</p>
+                <div>
+                  <label className="text-xs text-white/50 mb-1.5 block font-medium">Email</label>
+                  <input
+                    type="email"
+                    value={forgotEmail}
+                    onChange={e => setForgotEmail(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 focus:border-indigo-500 rounded-lg px-4 py-2.5 text-white focus:outline-none transition-colors"
+                    placeholder="name@example.com"
+                    required
+                  />
+                </div>
+                <button type="submit" className="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-2.5 rounded-lg transition-colors shadow-lg shadow-indigo-500/20">
+                  Send Reset Link
+                </button>
+              </form>
+            )}
+          </div>
+        </main>
+      );
     }
 
     return (
@@ -148,7 +223,7 @@ export default function Dashboard() {
           </button>
           <div className="flex items-center gap-3 mb-8 justify-center">
             <Shield size={28} className="text-indigo-400" />
-            <h1 className="text-2xl font-bold text-white">FiduScan Beta</h1>
+            <h1 className="text-2xl font-bold text-white">FiduScan</h1>
           </div>
           <form onSubmit={handleAuth} className="space-y-5">
             <div>
@@ -165,7 +240,19 @@ export default function Dashboard() {
               </div>
             </div>
             <div>
-              <label className="text-xs text-white/50 mb-1.5 block font-medium">Password</label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs text-white/50 font-medium">Password</label>
+                {/* A6: Forgot password entry point */}
+                {authMode === 'login' && (
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotPassword(true)}
+                    className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors font-medium"
+                  >
+                    Forgot password?
+                  </button>
+                )}
+              </div>
               <div className="relative">
                 <input 
                   type={showPassword ? "text" : "password"}
@@ -252,7 +339,7 @@ export default function Dashboard() {
             <div>
               <h1 className="text-xl sm:text-2xl font-bold gradient-text tracking-tight">FiduScan</h1>
               <p className="text-[10px] sm:text-xs text-white/35 font-medium tracking-wider uppercase mt-0.5">
-                AI Forensic Detection System
+                AI Media Forensics
               </p>
             </div>
           </div>
@@ -292,8 +379,9 @@ export default function Dashboard() {
           <SettingsHub />
         ) : (
           <>
-            {/* ── Scanner Controls & Stats ─────────────────────────────────────────────── */}
+            {/* ── Scanner Controls ─────────────────────────────────────────────── */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+              {/* A1: Remove "(MVP)" labels — use clean modality names */}
               <div className="flex bg-white/[0.04] rounded-lg p-1 border border-white/10 overflow-x-auto w-full sm:w-auto hide-scrollbar">
                 <button 
                   onClick={() => { setModality('image'); handleReset(); }} 
@@ -305,13 +393,13 @@ export default function Dashboard() {
                   onClick={() => { setModality('audio'); handleReset(); }} 
                   className={`flex-1 sm:flex-none px-4 py-2 text-xs rounded-md transition-colors whitespace-nowrap ${modality === 'audio' ? 'bg-indigo-500/20 text-indigo-300 font-bold' : 'text-white/50 hover:text-white/80'}`}
                 >
-                  Audio (MVP)
+                  Audio
                 </button>
                 <button 
                   onClick={() => { setModality('video'); handleReset(); }} 
                   className={`flex-1 sm:flex-none px-4 py-2 text-xs rounded-md transition-colors whitespace-nowrap ${modality === 'video' ? 'bg-indigo-500/20 text-indigo-300 font-bold' : 'text-white/50 hover:text-white/80'}`}
                 >
-                  Video (MVP)
+                  Video
                 </button>
               </div>
 
@@ -342,7 +430,7 @@ export default function Dashboard() {
               {[
                 { label: 'Model', value: modality === 'image' ? 'EfficientNet-B0' : modality === 'audio' ? 'Audio EfficientNet' : 'Multimodal Aggregation', icon: <Activity size={14} /> },
                 { label: 'Classes', value: 'Binary (2)', icon: <Scan size={14} /> },
-                { label: 'Input', value: modality === 'image' ? '224 × 224 px' : modality === 'audio' ? 'Log-Mel Spec (1x128xT)' : 'Multi-track', icon: <Shield size={14} /> },
+                { label: 'Input', value: modality === 'image' ? '224 × 224 px' : modality === 'audio' ? 'Log-Mel Spec (1×128×T)' : 'Multi-track', icon: <Shield size={14} /> },
               ].map((stat) => (
                 <div key={stat.label} className="glass-card px-4 py-3 flex items-center gap-3">
                   <span className="text-indigo-400/60">{stat.icon}</span>
@@ -368,7 +456,7 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <h2 className="text-sm font-semibold text-white/90">Forensic Analysis</h2>
-                  <p className="text-xs text-white/40">Upload an {modality} to begin detection</p>
+                  <p className="text-xs text-white/40">Upload {modality === 'audio' ? 'an' : 'a'} {modality} file to begin detection</p>
                 </div>
               </div>
 
@@ -379,14 +467,14 @@ export default function Dashboard() {
                 mode={modality}
               />
 
-              {/* Error state */}
+              {/* A1: Production-safe error state — no localhost references */}
               {state === 'error' && errorMsg && (
                 <div className="mt-4 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 animate-fade-in">
                   <p className="text-sm text-red-400 font-medium">Analysis Failed</p>
-                  <p className="text-xs text-red-400/70 mt-1 font-mono">{errorMsg}</p>
+                  <p className="text-xs text-red-400/70 mt-1">{errorMsg}</p>
                   <p className="text-xs text-white/30 mt-2">
-                    Ensure the backend is running on{' '}
-                    <span className="font-mono text-white/50">localhost:8000</span>
+                    If this issue persists, please contact{' '}
+                    <span className="text-white/50">support@fiduscan.ai</span>
                   </p>
                 </div>
               )}
@@ -422,7 +510,7 @@ export default function Dashboard() {
                     { step: '01', title: 'Upload', desc: 'Drop any WAV, MP3, or M4A audio file.' },
                     { step: '02', title: 'Preprocess', desc: 'Audio is resampled and converted to a Log-Mel Spectrogram.' },
                     { step: '03', title: 'Analyze', desc: 'A trained vision model analyzes the spectrogram for vocoder artifacts.' },
-                    { step: '04', title: 'Explain', desc: 'Prediction and confidence scores are returned (Phase 3A MVP).' },
+                    { step: '04', title: 'Explain', desc: 'Prediction and confidence scores are returned with forensic metadata.' },
                   ].map((item) => (
                     <div key={item.step} className="flex items-start gap-4">
                       <span className="text-indigo-500/60 font-mono text-xs font-bold shrink-0 mt-0.5">{item.step}</span>
@@ -435,7 +523,7 @@ export default function Dashboard() {
                     { step: '01', title: 'Upload', desc: 'Drop any MP4, MOV, AVI, or MKV video file.' },
                     { step: '02', title: 'Extract', desc: 'Keyframes and audio tracks are separated for independent processing.' },
                     { step: '03', title: 'Analyze', desc: 'Image, Audio, Metadata, and Temporal analyses are run in parallel.' },
-                    { step: '04', title: 'Aggregate', desc: 'A multimodal confidence score is returned along with forensic breakdowns (Phase 3B MVP).' },
+                    { step: '04', title: 'Aggregate', desc: 'A multimodal confidence score is returned along with forensic breakdowns.' },
                   ].map((item) => (
                     <div key={item.step} className="flex items-start gap-4">
                       <span className="text-indigo-500/60 font-mono text-xs font-bold shrink-0 mt-0.5">{item.step}</span>
@@ -460,7 +548,8 @@ export default function Dashboard() {
             ) : state === 'analyzing' ? (
               <ScanResultSkeleton />
             ) : (
-              <IdlePlaceholder />
+              // A2: Pass modality so idle placeholder copy is accurate
+              <IdlePlaceholder modality={modality} />
             )}
           </div>
         </div>
@@ -468,8 +557,9 @@ export default function Dashboard() {
         )}
 
         {/* ── Footer ────────────────────────────────────────────────── */}
+        {/* A1: Remove "Phase 1 MVP" and internal system name */}
         <footer className="mt-12 pt-6 border-t border-white/[0.04] flex items-center justify-between text-xs text-white/25">
-          <span>FiduScan · Anti-Gravity Forensic System · Phase 1 MVP</span>
+          <span>FiduScan · AI Media Forensics</span>
           <span className="font-mono">EfficientNet-B0 · PyTorch 2.4 · FastAPI</span>
         </footer>
       </div>
@@ -477,7 +567,15 @@ export default function Dashboard() {
   );
 }
 
-function IdlePlaceholder() {
+// A2: Dynamic idle placeholder — copy and icon adapt to active modality
+function IdlePlaceholder({ modality }: { modality: Modality }) {
+  const copy: Record<Modality, { title: string; sub: string }> = {
+    image: { title: 'Awaiting Image', sub: 'Upload an image on the left to run forensic analysis' },
+    audio: { title: 'Awaiting Audio', sub: 'Upload an audio file on the left to run forensic analysis' },
+    video: { title: 'Awaiting Video', sub: 'Upload a video file on the left to run forensic analysis' },
+  };
+  const { title, sub } = copy[modality];
+
   return (
     <div className="glass-card p-8 flex flex-col items-center justify-center min-h-[320px] gap-5">
       <div className="relative">
@@ -487,10 +585,8 @@ function IdlePlaceholder() {
         </div>
       </div>
       <div className="text-center">
-        <p className="text-sm font-medium text-white/30 mb-1">Awaiting Image</p>
-        <p className="text-xs text-white/20 max-w-[200px] leading-relaxed">
-          Upload an image on the left to run forensic analysis
-        </p>
+        <p className="text-sm font-medium text-white/30 mb-1">{title}</p>
+        <p className="text-xs text-white/20 max-w-[200px] leading-relaxed">{sub}</p>
       </div>
     </div>
   );

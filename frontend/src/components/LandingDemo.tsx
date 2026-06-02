@@ -1,15 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Shield, ArrowRight, PlayCircle, Building2, Lock, Zap, CheckCircle2 } from 'lucide-react';
 import ResultCard from './ResultCard';
 import { DetectionResult } from '@/types';
 
 interface LandingDemoProps {
   onSignInClick: () => void;
+  onRegisterClick: () => void;
 }
 
-export default function LandingDemo({ onSignInClick }: LandingDemoProps) {
+export default function LandingDemo({ onSignInClick, onRegisterClick }: LandingDemoProps) {
   const [demoState, setDemoState] = useState<'idle' | 'analyzing' | 'result'>('idle');
   const [progress, setProgress] = useState(0);
 
@@ -44,6 +45,9 @@ export default function LandingDemo({ onSignInClick }: LandingDemoProps) {
 
   const resetDemo = () => setDemoState('idle');
 
+  // A4: Backend API docs URL
+  const API_DOCS_URL = 'https://fiduscan-backend-production.up.railway.app/api/docs';
+
   return (
     <div className="min-h-screen bg-black text-white selection:bg-indigo-500/30">
       {/* Navigation */}
@@ -54,8 +58,22 @@ export default function LandingDemo({ onSignInClick }: LandingDemoProps) {
             <span className="font-bold text-lg tracking-tight">FiduScan<span className="text-indigo-500">.</span></span>
           </div>
           <div className="flex items-center gap-4">
-            <button className="text-sm text-white/60 hover:text-white transition-colors hidden sm:block">Enterprise</button>
-            <button className="text-sm text-white/60 hover:text-white transition-colors hidden sm:block">API Docs</button>
+            {/* A4: Enterprise link scrolls to enterprise section */}
+            <button
+              onClick={() => document.getElementById('enterprise-section')?.scrollIntoView({ behavior: 'smooth' })}
+              className="text-sm text-white/60 hover:text-white transition-colors hidden sm:block"
+            >
+              Enterprise
+            </button>
+            {/* A4: API Docs links to live backend docs */}
+            <a
+              href={API_DOCS_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-white/60 hover:text-white transition-colors hidden sm:block"
+            >
+              API Docs
+            </a>
             <button 
               onClick={onSignInClick}
               className="text-sm bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors font-medium"
@@ -71,20 +89,23 @@ export default function LandingDemo({ onSignInClick }: LandingDemoProps) {
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-medium mb-8">
             <Zap size={14} />
-            <span>Now supporting Multimodal Deepfake Detection</span>
+            {/* A7: Remove unverified claim — keep factual */}
+            <span>Multimodal Deepfake Detection — Image, Audio &amp; Video</span>
           </div>
+          {/* A7: "Cryptographic Certainty" → accurate, defensible headline */}
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
-            Detect AI Forgeries with <br className="hidden sm:block" />
+            Detect AI-Generated Media<br className="hidden sm:block" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-500">
-              Cryptographic Certainty
+              with Forensic Precision
             </span>
           </h1>
           <p className="text-lg sm:text-xl text-white/40 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Protect your platform from synthetic media. FiduScan analyzes image, audio, and video modalities using ensemble neural networks to detect AI generation.
+            Protect your platform from synthetic media. FiduScan analyzes images, audio, and video using ensemble neural networks to detect AI-generated content with explainable confidence scores.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            {/* A3: "Start Scanning Free" opens Register, not Login */}
             <button 
-              onClick={onSignInClick}
+              onClick={onRegisterClick}
               className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white px-8 py-3.5 rounded-xl font-medium transition-all shadow-lg shadow-indigo-500/25"
             >
               Start Scanning Free <ArrowRight size={18} />
@@ -95,7 +116,7 @@ export default function LandingDemo({ onSignInClick }: LandingDemoProps) {
               }}
               className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white px-8 py-3.5 rounded-xl font-medium transition-colors"
             >
-              <PlayCircle size={18} className="text-white/60" /> Watch Demo
+              <PlayCircle size={18} className="text-white/60" /> See It In Action
             </button>
           </div>
         </section>
@@ -104,7 +125,7 @@ export default function LandingDemo({ onSignInClick }: LandingDemoProps) {
         <section id="demo-section" className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center mb-12">
             <h2 className="text-2xl sm:text-3xl font-bold mb-4">See FiduScan in Action</h2>
-            <p className="text-white/40">Try our interactive simulation to see how we analyze media.</p>
+            <p className="text-white/40">Try the interactive simulation to see how we analyze media.</p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
@@ -118,7 +139,7 @@ export default function LandingDemo({ onSignInClick }: LandingDemoProps) {
                     <div className="w-16 h-16 rounded-full bg-indigo-500/20 flex items-center justify-center mb-4 cursor-pointer hover:scale-105 transition-transform" onClick={startDemo}>
                       <PlayCircle size={32} className="text-indigo-400" />
                     </div>
-                    <p className="text-sm font-medium mb-1">Click to run sample Deepfake</p>
+                    <p className="text-sm font-medium mb-1">Click to run sample analysis</p>
                     <p className="text-xs text-white/40">synth_profile_04.jpg (1.2MB)</p>
                   </div>
                 ) : demoState === 'analyzing' ? (
@@ -157,15 +178,15 @@ export default function LandingDemo({ onSignInClick }: LandingDemoProps) {
                 <div className="flex items-start gap-3">
                   <div className="mt-1"><Shield size={16} className="text-indigo-400" /></div>
                   <div>
-                    <h4 className="text-sm font-medium">Cryptographic Hashes</h4>
-                    <p className="text-xs text-white/40">Ensures file integrity and tracking.</p>
+                    <h4 className="text-sm font-medium">File Integrity Verification</h4>
+                    <p className="text-xs text-white/40">Cryptographic hashing ensures tamper-free analysis.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="mt-1"><Zap size={16} className="text-indigo-400" /></div>
                   <div>
-                    <h4 className="text-sm font-medium">Sub-second Inference</h4>
-                    <p className="text-xs text-white/40">Powered by EfficientNet-B0.</p>
+                    <h4 className="text-sm font-medium">Fast Inference</h4>
+                    <p className="text-xs text-white/40">Results typically returned in under 500ms.</p>
                   </div>
                 </div>
               </div>
@@ -180,48 +201,62 @@ export default function LandingDemo({ onSignInClick }: LandingDemoProps) {
                   <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mb-4">
                     <Shield size={28} className="text-white/20" />
                   </div>
-                  <p className="text-white/40 text-sm">Awaiting simulation to generate report.</p>
+                  <p className="text-white/40 text-sm">Run the simulation to see a forensic report.</p>
                 </div>
               )}
             </div>
           </div>
         </section>
 
-        {/* Enterprise Section */}
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-white/05">
+        {/* Enterprise Section — A4: id added so nav link scrolls correctly */}
+        <section id="enterprise-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-white/05">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl font-bold mb-6">Built for Enterprise Scale</h2>
+              <h2 className="text-3xl font-bold mb-6">Built for Scale</h2>
+              {/* A7: Remove "99.99% uptime SLAs" and "SOC2 Compliant" — unverified claims */}
               <p className="text-white/40 mb-8 leading-relaxed">
-                Integrate FiduScan directly into your trust & safety workflows. Our API handles thousands of concurrent streams with 99.99% uptime SLAs.
+                Integrate FiduScan directly into your trust &amp; safety workflows. Our REST API is designed for high-throughput media pipelines with consistent, low-latency responses.
               </p>
               <ul className="space-y-4 mb-8">
-                {['High-throughput REST API', 'Webhook notifications', 'Custom model fine-tuning', 'SOC2 Compliant Infrastructure'].map(item => (
+                {[
+                  'REST API with JSON responses',
+                  'Webhook notifications',
+                  'Custom model fine-tuning (Enterprise)',
+                  'Dedicated onboarding support',
+                ].map(item => (
                   <li key={item} className="flex items-center gap-3">
-                    <CheckCircle2 size={18} className="text-indigo-400" />
+                    <CheckCircle2 size={18} className="text-indigo-400 shrink-0" />
                     <span className="text-sm font-medium text-white/80">{item}</span>
                   </li>
                 ))}
               </ul>
-              <button className="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
-                View Documentation <ArrowRight size={16} />
-              </button>
+              {/* A4: "View Documentation" links to live docs */}
+              <a
+                href={API_DOCS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
+              >
+                View API Documentation <ArrowRight size={16} />
+              </a>
             </div>
             <div className="grid grid-cols-2 gap-4">
+              {/* A7: Replace unverified "10M+ Scans / Month" with factual capability claims */}
               <div className="glass-card p-6 flex flex-col items-center text-center justify-center h-40">
                 <Building2 size={24} className="text-white/40 mb-3" />
-                <p className="text-xl font-bold">10M+</p>
-                <p className="text-xs text-white/40 uppercase tracking-wider mt-1">Scans / Month</p>
+                <p className="text-xl font-bold">High-Volume</p>
+                <p className="text-xs text-white/40 uppercase tracking-wider mt-1">Batch Processing</p>
               </div>
               <div className="glass-card p-6 flex flex-col items-center text-center justify-center h-40">
                 <Zap size={24} className="text-white/40 mb-3" />
-                <p className="text-xl font-bold">&lt; 200ms</p>
-                <p className="text-xs text-white/40 uppercase tracking-wider mt-1">Avg Latency</p>
+                <p className="text-xl font-bold">Sub-second</p>
+                {/* A7: "< 200ms Avg Latency" removed — replace with honest description */}
+                <p className="text-xs text-white/40 uppercase tracking-wider mt-1">Typical Inference</p>
               </div>
               <div className="glass-card p-6 flex flex-col items-center text-center justify-center h-40 col-span-2">
                 <Lock size={24} className="text-white/40 mb-3" />
-                <p className="text-xl font-bold">Bank-grade Security</p>
-                <p className="text-xs text-white/40 mt-1 max-w-xs">Zero-retention policies available for sensitive media pipelines.</p>
+                <p className="text-xl font-bold">Privacy-First Design</p>
+                <p className="text-xs text-white/40 mt-1 max-w-xs">Zero-retention options available for sensitive media pipelines.</p>
               </div>
             </div>
           </div>
@@ -235,7 +270,7 @@ export default function LandingDemo({ onSignInClick }: LandingDemoProps) {
             <Shield className="text-white/40" size={20} />
             <span className="font-semibold text-white/40 tracking-tight">FiduScan</span>
           </div>
-          <p className="text-xs text-white/30">&copy; 2026 FiduScan Technologies. All rights reserved.</p>
+          <p className="text-xs text-white/30">&copy; 2026 FiduScan. All rights reserved.</p>
         </div>
       </footer>
     </div>
