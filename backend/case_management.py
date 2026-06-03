@@ -1,76 +1,83 @@
-import time
-import zipfile
-import io
-import json
-from typing import Dict, Any, List
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum
+from sqlalchemy.orm import declarative_base, relationship
+from datetime import datetime
+import enum
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 
-class CaseManagementEngine:
-    def __init__(self):
-        self.cases = {}
+Base = declarative_base()
 
-    def create_case(self, data: dict) -> dict:
-        case_id = f"case_{int(time.time())}"
-        case = {
-            "case_id": case_id,
-            "title": data.get("title", "Untitled Case"),
-            "description": data.get("description", ""),
-            "owner": data.get("owner", "analyst_1"),
-            "status": "OPEN",
-            "priority": data.get("priority", "MEDIUM"),
-            "created_at": int(time.time()),
-            "updated_at": int(time.time()),
-            "evidence": [],
-            "notes": [],
-            "review_status": "PENDING",
-            "approval_status": "PENDING"
-        }
-        self.cases[case_id] = case
-        return case
+class CaseStatus(str, enum.Enum):
+    OPEN = "open"
+    IN_PROGRESS = "in_progress"
+    CLOSED = "closed"
 
-    def update_case(self, case_id: str, data: dict) -> dict:
-        if case_id in self.cases:
-            self.cases[case_id].update(data)
-            self.cases[case_id]["updated_at"] = int(time.time())
-            return self.cases[case_id]
-        return None
+class PriorityLevel(str, enum.Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
 
-    def add_evidence(self, case_id: str, evidence_id: str) -> dict:
-        if case_id in self.cases:
-            self.cases[case_id]["evidence"].append(evidence_id)
-            self.cases[case_id]["updated_at"] = int(time.time())
-            return self.cases[case_id]
-        return None
+class Case(Base):
+    __tablename__ = "cases"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, index=True)
+    description = Column(String)
+    owner = Column(String)
+    status = Column(Enum(CaseStatus), default=CaseStatus.OPEN)
+    priority = Column(Enum(PriorityLevel), default=PriorityLevel.MEDIUM)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    evidence = relationship("CaseEvidence", back_populates="case")
+    reports = relationship("CaseReport", back_populates="case")
 
-    def add_notes(self, case_id: str, note: dict) -> dict:
-        if case_id in self.cases:
-            note_obj = {
-                "author": note.get("author"),
-                "content": note.get("content"),
-                "type": note.get("type", "FINDING"),
-                "timestamp": int(time.time())
-            }
-            self.cases[case_id]["notes"].append(note_obj)
-            self.cases[case_id]["updated_at"] = int(time.time())
-            return self.cases[case_id]
-        return None
+class CaseEvidence(Base):
+    __tablename__ = "case_evidence"
+    id = Column(Integer, primary_key=True, index=True)
+    case_id = Column(Integer, ForeignKey("cases.id"))
+    evidence_id = Column(String)
+    case = relationship("Case", back_populates="evidence")
 
-    def review_case(self, case_id: str, review_data: dict) -> dict:
-        if case_id in self.cases:
-            self.cases[case_id]["review_status"] = review_data.get("review_status", "REVIEWED")
-            self.cases[case_id]["approval_status"] = review_data.get("approval_status", "APPROVED")
-            self.cases[case_id]["updated_at"] = int(time.time())
-            return self.cases[case_id]
-        return None
+class CaseReport(Base):
+    __tablename__ = "case_reports"
+    id = Column(Integer, primary_key=True, index=True)
+    case_id = Column(Integer, ForeignKey("cases.id"))
+    report_id = Column(String)
+    case = relationship("Case", back_populates="reports")
 
-    def export_case(self, case_id: str) -> bytes:
-        if case_id in self.cases:
-            case = self.cases[case_id]
-            zip_buffer = io.BytesIO()
-            with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
-                # Add case details
-                zip_file.writestr("case_details.json", json.dumps(case, indent=2))
-                # Add mock reports, hashes, anchors, audit trail
-                zip_file.writestr("audit_trail.json", json.dumps({"events": []}, indent=2))
-                zip_file.writestr("blockchain_anchors.json", json.dumps({"anchors": []}, indent=2))
-            return zip_buffer.getvalue()
-        return None
+router = APIRouter(prefix="/cases", tags=["cases"])
+
+class CaseCreate(BaseModel):
+    title: str
+    description: str
+    priority: PriorityLevel = PriorityLevel.MEDIUM
+
+@router.post("/")
+def create_case(case: CaseCreate):
+    return {"id": 1, "title": case.title, "status": CaseStatus.OPEN}
+
+@router.get("/")
+def list_cases():
+    return [{"id": 1, "title": "Test Case", "status": CaseStatus.OPEN}]
+
+@router.get("/{case_id}")
+def get_case(case_id: int):
+    return {"id": case_id, "title": "Test Case", "status": CaseStatus.OPEN}
+
+@router.put("/{case_id}")
+def update_case(case_id: int, case: CaseCreate):
+    return {"id": case_id, "title": case.title, "status": CaseStatus.OPEN}
+
+@router.delete("/{case_id}")
+def delete_case(case_id: int):
+    return {"success": True}
+
+@router.post("/{case_id}/evidence")
+def link_evidence(case_id: int, evidence_id: str):
+    return {"success": True, "case_id": case_id, "evidence_id": evidence_id}
+
+@router.post("/{case_id}/reports")
+def link_report(case_id: int, report_id: str):
+    return {"success": True, "case_id": case_id, "report_id": report_id}

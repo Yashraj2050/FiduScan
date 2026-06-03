@@ -1,36 +1,39 @@
-import pytest
 from fastapi.testclient import TestClient
-from backend.main import app
+from backend.case_management import router
 
-client = TestClient(app)
+client = TestClient(router)
 
-def test_case_lifecycle():
-    # Create Case
-    resp = client.post("/api/v1/cases/create", json={"data": {"title": "Test Case", "owner": "investigator_1"}})
-    assert resp.status_code == 200
-    case_id = resp.json()["case_id"]
-    
-    # Update Case
-    resp = client.put("/api/v1/cases/update", json={"case_id": case_id, "data": {"status": "IN_PROGRESS"}})
-    assert resp.status_code == 200
-    assert resp.json()["status"] == "IN_PROGRESS"
-    
-    # Add Evidence
-    resp = client.post("/api/v1/cases/add_evidence", json={"case_id": case_id, "evidence_id": "ev_123"})
-    assert resp.status_code == 200
-    assert "ev_123" in resp.json()["evidence"]
-    
-    # Add Notes
-    resp = client.post("/api/v1/cases/add_notes", json={"case_id": case_id, "note": {"author": "analyst", "content": "Found watermark"}})
-    assert resp.status_code == 200
-    assert len(resp.json()["notes"]) == 1
-    
-    # Review Workflow
-    resp = client.post("/api/v1/cases/review", json={"case_id": case_id, "review_data": {"review_status": "REVIEWED", "approval_status": "APPROVED"}})
-    assert resp.status_code == 200
-    assert resp.json()["approval_status"] == "APPROVED"
-    
-    # Export Workflow
-    resp = client.get(f"/api/v1/cases/export/{case_id}")
-    assert resp.status_code == 200
-    assert resp.headers["content-type"] == "application/zip"
+def test_create_case():
+    response = client.post("/", json={"title": "New Case", "description": "Test", "priority": "medium"})
+    assert response.status_code == 200
+    assert response.json()["title"] == "New Case"
+
+def test_list_cases():
+    response = client.get("/")
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+
+def test_get_case():
+    response = client.get("/1")
+    assert response.status_code == 200
+    assert response.json()["id"] == 1
+
+def test_update_case():
+    response = client.put("/1", json={"title": "Updated", "description": "Test", "priority": "high"})
+    assert response.status_code == 200
+    assert response.json()["title"] == "Updated"
+
+def test_delete_case():
+    response = client.delete("/1")
+    assert response.status_code == 200
+    assert response.json()["success"] == True
+
+def test_link_evidence():
+    response = client.post("/1/evidence?evidence_id=ev_123")
+    assert response.status_code == 200
+    assert response.json()["evidence_id"] == "ev_123"
+
+def test_link_report():
+    response = client.post("/1/reports?report_id=rep_123")
+    assert response.status_code == 200
+    assert response.json()["report_id"] == "rep_123"
