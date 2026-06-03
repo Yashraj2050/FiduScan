@@ -17,7 +17,7 @@ from slowapi.middleware import SlowAPIMiddleware
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from routers import detect, health, audio, video, auth, history, apikeys, billing, watermark
+from routers import detect, health, audio, video, auth, history, apikeys, billing, watermark, reports
 from middleware.rate_limiter import limiter, rate_limit_exceeded_handler
 from database import engine
 import models
@@ -105,6 +105,7 @@ app.include_router(history.router, prefix="/api/v1", tags=["History"])
 app.include_router(apikeys.router, prefix="/api/v1", tags=["API Keys"])
 app.include_router(billing.router, prefix="/api/v1/billing", tags=["Billing"])
 app.include_router(watermark.router, prefix="/api/v1/watermark", tags=["Watermark"])
+app.include_router(reports.router, prefix="/api/v1/reports", tags=["Reports"])
 
 
 @app.exception_handler(Exception)
