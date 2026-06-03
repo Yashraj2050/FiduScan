@@ -1,29 +1,50 @@
-import json
-import time
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
+from sqlalchemy.orm import declarative_base
+from datetime import datetime
+from fastapi import APIRouter
+from pydantic import BaseModel
+import uuid
 
-class SpreadSpectrumAudioWatermark:
-    """
-    Audio watermarking using Spread-Spectrum techniques.
-    Supports WAV, MP3, M4A.
-    """
-    
-    def embed_watermark(self, audio_data: bytes, payload: dict) -> bytes:
-        # Mock embedding
-        payload_str = json.dumps(payload).encode()
-        return b"AUDIO_WM_SS_" + audio_data
-        
-    def extract_watermark(self, audio_data: bytes) -> dict:
-        if audio_data.startswith(b"AUDIO_WM_SS_"):
-            return {"watermark_id": "aud-1234", "timestamp": int(time.time()), "version": "1.0"}
-        return None
+Base = declarative_base()
 
-    def verify_watermark(self, extracted_payload: dict) -> bool:
-        if not extracted_payload:
-            return False
-        return extracted_payload.get("version") == "1.0"
-        
-    def generate_authenticity_metrics(self, is_valid: bool) -> dict:
+class AudioWatermarkRecord(Base):
+    __tablename__ = "audio_watermarks"
+    id = Column(Integer, primary_key=True, index=True)
+    file_hash = Column(String, index=True)
+    watermark_payload = Column(String)
+    extracted = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+router = APIRouter(prefix="/audio/watermark", tags=["audio_watermark"])
+
+class AudioEmbedRequest(BaseModel):
+    file_hash: str
+    payload: str
+
+class AudioVerifyRequest(BaseModel):
+    file_hash: str
+
+@router.post("/embed")
+def embed_audio_watermark(req: AudioEmbedRequest):
+    # Simulated audio processing logic: LSB steganography in WAV/MP3 files
+    return {
+        "id": 1,
+        "file_hash": req.file_hash,
+        "watermark_payload": req.payload,
+        "status": "embedded"
+    }
+
+@router.post("/verify")
+def verify_audio_watermark(req: AudioVerifyRequest):
+    # Simulated extraction
+    if req.file_hash == "valid_audio_hash":
         return {
-            "authenticity_score": 99.5 if is_valid else 5.0,
-            "verification_confidence": 0.98 if is_valid else 0.95
+            "verified": True,
+            "payload": "fiduscan_auth_123",
+            "integrity": "intact"
         }
+    return {
+        "verified": False,
+        "payload": None,
+        "integrity": "tampered"
+    }
