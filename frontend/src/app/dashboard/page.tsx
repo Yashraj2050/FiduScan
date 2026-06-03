@@ -56,7 +56,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stat Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 28 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 28 }} role="region" aria-label="Platform summary statistics">
         {STATS.map((s, i) => {
           const Icon = s.icon
           return (
@@ -93,15 +93,15 @@ export default function DashboardPage() {
             </Link>
           </div>
 
-          <table className="fs-table">
+            <table className="fs-table" role="table" aria-label="Active investigations">
             <thead>
-              <tr>
-                <th>Case ID</th>
-                <th>Title</th>
-                <th>Priority</th>
-                <th>Evidence</th>
-                <th>Status</th>
-                <th>Updated</th>
+              <tr role="row">
+                <th role="columnheader" data-sortable aria-sort="none">Case ID</th>
+                <th role="columnheader" data-sortable aria-sort="descending">Title</th>
+                <th role="columnheader">Priority</th>
+                <th role="columnheader">Evidence</th>
+                <th role="columnheader">Status</th>
+                <th role="columnheader" data-sortable aria-sort="none">Updated</th>
               </tr>
             </thead>
             <tbody>

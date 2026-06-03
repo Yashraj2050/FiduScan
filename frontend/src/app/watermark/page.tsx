@@ -123,12 +123,15 @@ export default function WatermarkPage() {
         style={{ marginBottom: 28, opacity: file ? 1 : 0.5 }}
         onClick={file ? handleProcess : undefined}
         disabled={loading}
+        aria-busy={loading}
+        aria-disabled={!file}
       >
         <Droplets size={14} />
         {loading ? 'Processing…' : action === 'embed' ? 'Embed Watermark' : action === 'extract' ? 'Extract Watermark' : 'Verify Watermark'}
       </button>
 
       {/* Result */}
+      <div aria-live="polite" aria-atomic="true">
       {result && (
         <div className="fs-card animate-fade-up" style={{
           padding: '24px',
@@ -168,6 +171,8 @@ export default function WatermarkPage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   )
 }
+

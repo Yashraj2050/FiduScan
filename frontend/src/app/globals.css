@@ -804,3 +804,362 @@ body::before {
 .text-chain   { color: var(--fs-chain); }
 
 .mono { font-family: var(--font-mono); }
+
+/* ═══════════════════════════════════════════════════════════
+   ACCESSIBILITY — IMPROVEMENT #1
+   Focus-visible: keyboard navigation rings visible,
+   mouse click rings suppressed.
+═══════════════════════════════════════════════════════════ */
+
+:focus { outline: none; }
+
+:focus-visible {
+  outline: 2px solid var(--fs-accent);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+/* Skip-to-content link for screen readers */
+.skip-link {
+  position: fixed;
+  top: -60px;
+  left: 16px;
+  z-index: 9999;
+  background: var(--fs-accent);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: var(--r-sm);
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: top 0.15s ease;
+  text-decoration: none;
+}
+
+.skip-link:focus-visible {
+  top: 16px;
+}
+
+/* High-contrast text for WCAG AA compliance */
+.fs-text-wcag {
+  color: rgba(255, 255, 255, 0.88); /* ≥ 4.5:1 on --fs-panel */
+}
+
+/* ═══════════════════════════════════════════════════════════
+   REDUCED MOTION — IMPROVEMENT #2
+   Respects system preference: prefers-reduced-motion.
+═══════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .fs-status-dot.pulse { animation: none; }
+  .animate-fade-up,
+  .animate-fade-in,
+  .animate-spin-slow { animation: none; opacity: 1; transform: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   EMPTY STATES — IMPROVEMENT #3
+═══════════════════════════════════════════════════════════ */
+
+.fs-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  text-align: center;
+  gap: 12px;
+}
+
+.fs-empty-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--r-lg);
+  background: var(--fs-elevated);
+  border: 1px solid var(--fs-border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.fs-empty-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--fs-text-1);
+}
+
+.fs-empty-desc {
+  font-size: 0.8125rem;
+  color: var(--fs-text-3);
+  max-width: 320px;
+  line-height: 1.6;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOAST / NOTIFICATION — IMPROVEMENT #4
+═══════════════════════════════════════════════════════════ */
+
+.fs-toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.fs-toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  background: var(--fs-elevated);
+  border: 1px solid var(--fs-border-strong);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-lg);
+  pointer-events: all;
+  max-width: 360px;
+  animation: fade-up 0.25s ease both;
+}
+
+.fs-toast-success { border-color: rgba(34,197,94,0.35); }
+.fs-toast-error   { border-color: rgba(239,68,68,0.35); }
+.fs-toast-info    { border-color: rgba(79,110,247,0.35); }
+
+/* ═══════════════════════════════════════════════════════════
+   TABLE IMPROVEMENTS — IMPROVEMENT #5
+   Sortable header + sticky first col for wide tables.
+═══════════════════════════════════════════════════════════ */
+
+.fs-table th[data-sortable] {
+  cursor: pointer;
+  user-select: none;
+}
+
+.fs-table th[data-sortable]:hover {
+  color: var(--fs-text-2);
+}
+
+.fs-table th[aria-sort="ascending"]::after  { content: ' ↑'; }
+.fs-table th[aria-sort="descending"]::after { content: ' ↓'; }
+
+/* Row selected state */
+.fs-table tbody tr[aria-selected="true"] td {
+  background: var(--fs-accent-dim);
+}
+
+/* Zebra striping for dense tables */
+.fs-table-striped tbody tr:nth-child(even) td {
+  background: rgba(255,255,255,0.015);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOOLTIP — IMPROVEMENT #6
+═══════════════════════════════════════════════════════════ */
+
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--fs-elevated);
+  color: var(--fs-text-1);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  padding: 5px 10px;
+  border-radius: var(--r-xs);
+  border: 1px solid var(--fs-border-strong);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--t-fast);
+  z-index: 50;
+}
+
+[data-tooltip]:hover::after,
+[data-tooltip]:focus-visible::after {
+  opacity: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   KEYBOARD SHORTCUT BADGE — IMPROVEMENT #7
+═══════════════════════════════════════════════════════════ */
+
+.fs-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 5px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--fs-text-3);
+  background: var(--fs-elevated);
+  border: 1px solid var(--fs-border-strong);
+  border-radius: 4px;
+  line-height: 1.4;
+  box-shadow: 0 1px 0 0 var(--fs-border-strong);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE — IMPROVEMENT #8
+═══════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: 100vw;
+    --topbar-height: 56px;
+    font-size: 13px;
+  }
+
+  .fs-h1 { font-size: 2.25rem; }
+  .fs-h2 { font-size: 1.5rem; }
+
+  /* On mobile, stat grid collapses to 2-col */
+  .fs-stat-grid-mobile {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Main/sidebar stack on mobile */
+  .fs-mobile-stack {
+    flex-direction: column !important;
+  }
+
+  /* Case list takes full width, detail hidden until selected */
+  .fs-mobile-list-full {
+    width: 100% !important;
+  }
+
+  /* Tables become scrollable on mobile */
+  .fs-table-scroll-mobile {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Feature grid goes 1-col */
+  .fs-feature-grid-mobile {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Topbar search bar shrinks */
+  .fs-topbar-search { min-width: unset !important; width: 140px !important; }
+
+  /* Hero stats collapse */
+  .fs-hero-stats-mobile {
+    flex-direction: column !important;
+    width: 100% !important;
+  }
+
+  .fs-hero-stats-mobile > div {
+    border-right: none !important;
+    border-bottom: 1px solid var(--fs-border);
+  }
+}
+
+@media (max-width: 480px) {
+  .fs-h1 { font-size: 1.875rem; }
+  .fs-btn-lg { height: 40px; padding: 0 18px; font-size: 0.875rem; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PRINT STYLES — IMPROVEMENT #9
+   Forensic reports may be printed directly from the platform.
+═══════════════════════════════════════════════════════════ */
+
+@media print {
+  body {
+    background: #fff;
+    color: #000;
+  }
+
+  body::before { display: none; }
+
+  aside, .fs-topbar, .fs-btn, nav { display: none !important; }
+
+  .fs-card, .fs-panel {
+    background: #fff !important;
+    border-color: #ddd !important;
+    box-shadow: none !important;
+  }
+
+  .fs-hash, .fs-mono {
+    color: #333 !important;
+    font-size: 0.6875rem !important;
+  }
+
+  .fs-badge-verified { color: #166534 !important; background: #dcfce7 !important; }
+  .fs-badge-tampered { color: #991b1b !important; background: #fee2e2 !important; }
+  .fs-badge-chain    { color: #3730a3 !important; background: #e0e7ff !important; }
+
+  .fs-chain-timeline::before { background: #6366f1; }
+  .fs-chain-event::before    { background: #6366f1; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LOADING STATES — IMPROVEMENT #10
+   Spinner + inline loading indicator for async actions.
+═══════════════════════════════════════════════════════════ */
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.fs-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.12);
+  border-top-color: var(--fs-accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+.fs-spinner-sm {
+  width: 12px;
+  height: 12px;
+}
+
+.fs-btn[aria-busy="true"] {
+  opacity: 0.7;
+  cursor: wait;
+  pointer-events: none;
+}
+
+/* Progress bar */
+.fs-progress {
+  height: 2px;
+  background: var(--fs-border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.fs-progress-bar {
+  height: 100%;
+  border-radius: 99px;
+  background: linear-gradient(90deg, var(--fs-accent), var(--fs-chain));
+  transition: width 0.4s ease;
+}
+
+.fs-progress-bar.indeterminate {
+  width: 40%;
+  animation: indeterminate 1.4s ease infinite;
+}
+
+@keyframes indeterminate {
+  0%   { transform: translateX(-150%); }
+  100% { transform: translateX(350%); }
+}
+

@@ -18,7 +18,7 @@ function IntegrityMeter({ score }: { score: number }) {
   const color = score > 0.7 ? 'var(--fs-verified)' : score > 0.4 ? 'var(--fs-uncertain)' : 'var(--fs-tampered)'
 
   return (
-    <div className="fs-integrity-ring" style={{ width: 72, height: 72 }}>
+    <div className="fs-integrity-ring" style={{ width: 72, height: 72 }} role="meter" aria-label={`Authenticity score: ${Math.round(score * 100)} percent`} aria-valuenow={Math.round(score * 100)} aria-valuemin={0} aria-valuemax={100}>
       <svg width="72" height="72" viewBox="0 0 72 72">
         <circle cx="36" cy="36" r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="4" />
         <circle
@@ -42,7 +42,7 @@ export default function EvidencePage() {
     <div style={{ height: '100%', display: 'flex' }}>
 
       {/* Evidence List */}
-      <aside style={{ width: 380, flexShrink: 0, borderRight: '1px solid var(--fs-border)', display: 'flex', flexDirection: 'column' }}>
+      <aside style={{ width: 380, flexShrink: 0, borderRight: '1px solid var(--fs-border)', display: 'flex', flexDirection: 'column' }} role="complementary" aria-label="Evidence list" aria-live="polite">
         <div style={{ padding: '20px 16px 12px', borderBottom: '1px solid var(--fs-border)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
             <h2 style={{ fontWeight: 700, fontSize: '0.9375rem', letterSpacing: '-0.02em' }}>Evidence Vault</h2>

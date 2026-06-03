@@ -71,8 +71,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body style={{ display: 'flex', height: '100vh', overflow: 'hidden', position: 'relative', zIndex: 1 }}>
 
+        {/* Skip-to-content for keyboard/screen-reader users */}
+        <a href="#main-content" className="skip-link">Skip to main content</a>
+
         {/* ── Sidebar ─────────────────────────────────────────────── */}
-        <aside style={{
+        <aside role="navigation" aria-label="Primary navigation" style={{
           width: collapsed ? 'var(--sidebar-collapsed)' : 'var(--sidebar-width)',
           flexShrink: 0,
           background: 'var(--fs-surface)',
@@ -185,7 +188,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </header>
 
           {/* Page content */}
-          <main style={{ flex: 1, overflowY: 'auto', position: 'relative', zIndex: 1 }}>
+          <main id="main-content" style={{ flex: 1, overflowY: 'auto', position: 'relative', zIndex: 1 }} role="main">
             {children}
           </main>
         </div>
