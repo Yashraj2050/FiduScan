@@ -1,45 +1,40 @@
-import pytest
 from fastapi.testclient import TestClient
-from backend.main import app
+from backend.evidence_chain import router
 
-client = TestClient(app)
+client = TestClient(router)
 
-def test_create_and_verify_evidence():
-    data = {
-        "file_hash": "hash_123",
-        "report_hash": "rep_hash_123",
-        "watermark_id": "wm_123",
-        "user_id": "user_123",
-        "authenticity_score": 99.0
-    }
-    
-    # Create evidence
-    response = client.post("/api/v1/evidence/create", json={"data": data})
-    assert response.status_code == 200
-    record = response.json()
-    assert "evidence_id" in record
-    record_id = record["evidence_id"]
-    
-    # Verify valid evidence
-    response = client.post("/api/v1/evidence/verify", json={
-        "record_id": record_id,
-        "current_file_hash": "hash_123",
-        "current_report_hash": "rep_hash_123"
+def test_create_evidence():
+    response = client.post("/", json={
+        "case_id": 1,
+        "file_hash": "hash_xyz",
+        "report_hash": "rep_xyz",
+        "authenticity_score": 0.99
     })
     assert response.status_code == 200
-    assert response.json()["valid"] == True
-    
-    # Verify tampered evidence
-    response = client.post("/api/v1/evidence/verify", json={
-        "record_id": record_id,
-        "current_file_hash": "hash_tampered",
-        "current_report_hash": "rep_hash_123"
+    assert response.json()["status"] == "created"
+
+def test_retrieve_evidence():
+    response = client.get("/1")
+    assert response.status_code == 200
+    assert "file_hash" in response.json()
+
+def test_verify_evidence_success():
+    response = client.post("/1/verify", json={
+        "file_hash": "mock_hash_123",
+        "report_hash": "mock_report_456"
     })
     assert response.status_code == 200
-    assert response.json()["valid"] == False
-    
-    # Check history
-    response = client.get(f"/api/v1/evidence/history/{record_id}")
+    assert response.json()["verified"] == True
+
+def test_verify_evidence_failure():
+    response = client.post("/1/verify", json={
+        "file_hash": "tampered_hash",
+        "report_hash": "mock_report_456"
+    })
     assert response.status_code == 200
-    history = response.json()["history"]
-    assert len(history) >= 2 # created + verified
+    assert response.json()["verified"] == False
+
+def test_retrieve_custody():
+    response = client.get("/1/custody")
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)

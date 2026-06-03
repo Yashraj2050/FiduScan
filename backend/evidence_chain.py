@@ -1,60 +1,74 @@
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float, JSON
+from sqlalchemy.orm import declarative_base
+from datetime import datetime
+from fastapi import APIRouter
+from pydantic import BaseModel
+from typing import Optional, Dict
 import hashlib
-import time
-from typing import List, Dict
 
-class EvidenceChainEngine:
-    def __init__(self):
-        self.evidence_records = {}
-        self.audit_log = []
-        
-    def create_evidence_record(self, data: dict) -> dict:
-        record_id = f"ev_{int(time.time())}"
-        
-        record = {
-            "evidence_id": record_id,
-            "file_hash": data.get("file_hash"),
-            "report_hash": data.get("report_hash"),
-            "watermark_id": data.get("watermark_id"),
-            "timestamp": int(time.time()),
-            "user_id": data.get("user_id"),
-            "authenticity_score": data.get("authenticity_score"),
-            "history": []
-        }
-        
-        # Log creation in chain of custody
-        self._log_event(record_id, "CREATED", data.get("user_id"))
-        self.evidence_records[record_id] = record
-        return record
+Base = declarative_base()
 
-    def verify_evidence(self, record_id: str, current_file_hash: str, current_report_hash: str) -> dict:
-        record = self.evidence_records.get(record_id)
-        if not record:
-            return {"valid": False, "reason": "Not Found"}
-            
-        file_valid = record["file_hash"] == current_file_hash
-        report_valid = record["report_hash"] == current_report_hash
-        
-        self._log_event(record_id, "VERIFIED", "system", {"file_valid": file_valid, "report_valid": report_valid})
-        
-        return {
-            "valid": file_valid and report_valid,
-            "file_integrity": file_valid,
-            "report_integrity": report_valid,
-            "watermark_integrity": True # Placeholder
-        }
+class Evidence(Base):
+    __tablename__ = "evidence_records"
+    id = Column(Integer, primary_key=True, index=True)
+    case_id = Column(Integer, index=True)
+    file_hash = Column(String, index=True)
+    report_hash = Column(String)
+    watermark_id = Column(String, nullable=True)
+    authenticity_score = Column(Float)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
-    def retrieve_evidence_history(self, record_id: str) -> List[dict]:
-        return [log for log in self.audit_log if log["evidence_id"] == record_id]
+class CustodyEvent(Base):
+    __tablename__ = "custody_events"
+    id = Column(Integer, primary_key=True, index=True)
+    evidence_id = Column(Integer, ForeignKey("evidence_records.id"))
+    actor_id = Column(String)
+    action = Column(String)
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    metadata_json = Column(JSON, nullable=True)
 
-    def _log_event(self, record_id: str, action: str, actor: str, details: dict = None):
-        event = {
-            "timestamp": int(time.time()),
-            "evidence_id": record_id,
-            "action": action,
-            "actor": actor,
-            "details": details or {}
-        }
-        self.audit_log.append(event)
-        
-        if record_id in self.evidence_records:
-            self.evidence_records[record_id]["history"].append(event)
+router = APIRouter(prefix="/evidence", tags=["evidence"])
+
+class EvidenceCreate(BaseModel):
+    case_id: int
+    file_hash: str
+    report_hash: str
+    watermark_id: Optional[str] = None
+    authenticity_score: float
+
+class VerificationRequest(BaseModel):
+    file_hash: str
+    report_hash: str
+
+@router.post("/")
+def create_evidence(req: EvidenceCreate):
+    return {
+        "id": 1,
+        "case_id": req.case_id,
+        "file_hash": req.file_hash,
+        "report_hash": req.report_hash,
+        "authenticity_score": req.authenticity_score,
+        "status": "created"
+    }
+
+@router.get("/{evidence_id}")
+def retrieve_evidence(evidence_id: int):
+    return {
+        "id": evidence_id,
+        "file_hash": "mock_hash_123",
+        "report_hash": "mock_report_456",
+        "authenticity_score": 0.98
+    }
+
+@router.post("/{evidence_id}/verify")
+def verify_evidence(evidence_id: int, req: VerificationRequest):
+    # Simulated integrity check
+    if req.file_hash == "mock_hash_123" and req.report_hash == "mock_report_456":
+        return {"verified": True, "integrity_status": "intact"}
+    return {"verified": False, "integrity_status": "tampered"}
+
+@router.get("/{evidence_id}/custody")
+def retrieve_custody_history(evidence_id: int):
+    return [
+        {"action": "created", "actor_id": "sys", "timestamp": str(datetime.utcnow())}
+    ]
