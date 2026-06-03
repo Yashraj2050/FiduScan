@@ -1,41 +1,31 @@
-import type { Metadata } from 'next';
-import { ToastProvider } from '@/components/ToastContext';
-import './globals.css';
-
-export const metadata: Metadata = {
-  title: 'FiduScan — AI Media Forensics',
-  description:
-    'Detect AI-generated images, audio, and video with confidence scoring, EXIF metadata analysis, and explainability heatmaps. Protect your platform from synthetic media.',
-  keywords: ['AI detection', 'deepfake detection', 'media forensics', 'image authentication', 'synthetic media', 'FiduScan'],
-  authors: [{ name: 'FiduScan' }],
-  robots: 'index, follow',
-  icons: {
-    icon: '/favicon.svg',
-    shortcut: '/favicon.svg',
-  },
-};
+import './globals.css'
+import Link from 'next/link'
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body>
-        <ToastProvider>
+    <html lang="en">
+      <body className="flex h-screen bg-zinc-900 text-white">
+        <aside className="w-64 bg-black p-4 flex flex-col gap-4 border-r border-zinc-800">
+          <div className="font-bold text-xl mb-4 text-blue-500">FiduScan v3.0</div>
+          <nav className="flex flex-col gap-2">
+            <Link href="/" className="hover:text-blue-400">Dashboard</Link>
+            <Link href="/investigations" className="hover:text-blue-400">Investigations</Link>
+            <Link href="/evidence" className="hover:text-blue-400">Evidence</Link>
+            <Link href="/watermark" className="hover:text-blue-400">Watermarking</Link>
+            <Link href="/reports" className="hover:text-blue-400">Reports</Link>
+            <Link href="/developer" className="hover:text-blue-400">Developer Portal</Link>
+            <Link href="/billing" className="hover:text-blue-400">Billing</Link>
+            <Link href="/settings" className="hover:text-blue-400">Settings</Link>
+          </nav>
+        </aside>
+        <main className="flex-1 p-8 overflow-y-auto">
           {children}
-        </ToastProvider>
+        </main>
       </body>
     </html>
-  );
+  )
 }
