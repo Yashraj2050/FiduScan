@@ -17,7 +17,7 @@ from slowapi.middleware import SlowAPIMiddleware
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from routers import detect, health, audio, video, auth, history, apikeys, billing, watermark, reports, audio_watermark, video_watermark, evidence, blockchain, case_management, sso, audit
+from routers import detect, health, audio, video, auth, history, apikeys, billing, watermark, reports, audio_watermark, video_watermark, evidence, blockchain, case_management, sso, audit, apidocs
 from middleware.rate_limiter import limiter, rate_limit_exceeded_handler
 from database import engine
 import models
@@ -108,6 +108,7 @@ app.include_router(watermark.router, prefix="/api/v1/watermark", tags=["Watermar
 app.include_router(reports.router, prefix="/api/v1/reports", tags=["Reports"])
 app.include_router(sso.router, prefix="/api/v1/sso", tags=["SSO"])
 app.include_router(audit.router, prefix="/api/v1/audit", tags=["Audit"])
+app.include_router(apidocs.router, prefix="/api/v1/docs", tags=["API Docs"])
 app.include_router(audio_watermark.router, prefix="/api/v1/audio_watermark", tags=["Audio Watermark"])
 app.include_router(video_watermark.router, prefix="/api/v1/video_watermark", tags=["Video Watermark"])
 app.include_router(evidence.router, prefix="/api/v1/evidence", tags=["Evidence Chain"])
