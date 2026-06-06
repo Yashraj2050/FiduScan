@@ -5,12 +5,10 @@ import os
 import logging
 
 router = APIRouter()
-WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "whsec_123")
+WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET")
 
-@router.post("/create-checkout-session")
-def create_checkout_session(customer_id: str, price_id: str):
-    session = StripeService.create_checkout_session(customer_id, price_id)
-    return {"url": session.url}
+if not WEBHOOK_SECRET:
+    raise RuntimeError("STRIPE_WEBHOOK_SECRET is required.")
 
 @router.post("/webhook")
 async def stripe_webhook(request: Request, stripe_signature: str = Header(None)):
@@ -20,10 +18,16 @@ async def stripe_webhook(request: Request, stripe_signature: str = Header(None))
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    # Handle events
     if event["type"] == "checkout.session.completed":
         logging.info("Payment successful.")
+        customer_id = event["data"]["object"]["customer"]
+        StripeService.update_quota(customer_id, "PRO")
+    elif event["type"] == "invoice.paid":
+        logging.info("Invoice paid.")
+        StripeService.generate_invoice_record(event["data"]["object"])
     elif event["type"] == "customer.subscription.deleted":
         logging.info("Subscription canceled.")
+        customer_id = event["data"]["object"]["customer"]
+        StripeService.update_quota(customer_id, "FREE")
         
     return {"status": "success"}
