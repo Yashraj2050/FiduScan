@@ -1,6 +1,10 @@
-'use client'
-
+import type { Metadata } from 'next'
 import { CreditCard, Zap, Shield, ChevronRight, Check } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: 'Billing',
+  description: 'Manage your FiduScan subscription, usage quota, and payment details.',
+}
 
 const PLANS = [
   {

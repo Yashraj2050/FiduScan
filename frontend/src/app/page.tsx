@@ -1,14 +1,32 @@
-'use client'
-
-import dynamic from 'next/dynamic'
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Shield, Droplets, Link2, FileText, ChevronRight, Check } from 'lucide-react'
+import { HeroSceneLoader } from '@/components/v6/HeroSceneLoader'
 
-const HeroScene = dynamic(
-  () => import('@/components/v6/HeroScene').then(m => m.HeroScene),
-  { ssr: false, loading: () => <div style={{ flex: 1 }} /> }
-)
-
+export const metadata: Metadata = {
+  title: 'FiduScan — Digital Forensic Intelligence Platform',
+  description:
+    'Enterprise forensic platform for deepfake detection, digital watermarking, and immutable evidence chains. Built for investigators who require legal-grade proof.',
+  keywords: [
+    'deepfake detection', 'digital forensics', 'evidence chain',
+    'blockchain anchoring', 'digital watermarking', 'media authentication',
+    'forensic investigation', 'AI deepfake',
+  ],
+  openGraph: {
+    title: 'FiduScan — Digital Forensic Intelligence Platform',
+    description: 'Enterprise forensic platform for deepfake detection, digital watermarking, and immutable evidence chains.',
+    type: 'website',
+    locale: 'en_US',
+    siteName: 'FiduScan',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'FiduScan — Digital Forensic Intelligence Platform',
+    description: 'Enterprise deepfake detection, watermarking, and blockchain-anchored evidence chains.',
+  },
+  alternates: { canonical: 'https://fiduscan.io' },
+  robots: { index: true, follow: true },
+}
 const FEATURES = [
   {
     icon: Shield,
@@ -55,6 +73,7 @@ const TRUST = [
   'PDF & JSON report export for legal proceedings',
 ]
 
+// ─── Page (Server Component — no 'use client') ────────────────────────────
 export default function LandingPage() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--fs-bg)' }}>
@@ -79,7 +98,7 @@ export default function LandingPage() {
           <span style={{ fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.03em' }}>FiduScan</span>
           <span className="fs-badge fs-badge-accent" style={{ marginLeft: 4 }}>Forensic Platform</span>
         </div>
-        <nav style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <nav aria-label="Top navigation" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <Link href="/dashboard" className="fs-btn fs-btn-ghost" style={{ fontSize: '0.875rem' }}>Platform</Link>
           <Link href="/dashboard" className="fs-btn fs-btn-primary">
             Start Investigating <ChevronRight size={14} />
@@ -88,10 +107,13 @@ export default function LandingPage() {
       </header>
 
       {/* ── Hero ────────────────────────────────────────────────── */}
-      <section style={{ position: 'relative', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-        {/* 3D Canvas */}
-        <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
-          <HeroScene />
+      <section
+        aria-label="Hero"
+        style={{ position: 'relative', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}
+      >
+        {/* 3D Canvas — lazy client component, never blocks RSC render */}
+        <div style={{ position: 'absolute', inset: 0, zIndex: 0 }} aria-hidden="true">
+          <HeroSceneLoader />
         </div>
 
         {/* Radial vignette */}
@@ -153,17 +175,17 @@ export default function LandingPage() {
         </div>
 
         {/* Scroll hint */}
-        <div style={{ position: 'absolute', bottom: 32, zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+        <div style={{ position: 'absolute', bottom: 32, zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }} aria-hidden="true">
           <span style={{ fontSize: '0.6875rem', color: 'var(--fs-text-3)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Discover</span>
           <div style={{ width: 1, height: 40, background: 'linear-gradient(to bottom, var(--fs-border-strong), transparent)' }} />
         </div>
       </section>
 
       {/* ── Features ────────────────────────────────────────────── */}
-      <section style={{ padding: '120px 40px', maxWidth: 1200, margin: '0 auto' }}>
+      <section aria-labelledby="features-heading" style={{ padding: '120px 40px', maxWidth: 1200, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 72 }}>
           <div className="fs-label" style={{ marginBottom: 16 }}>Capabilities</div>
-          <h2 className="fs-h2">Built for forensic-grade verification</h2>
+          <h2 id="features-heading" className="fs-h2">Built for forensic-grade verification</h2>
           <p style={{ color: 'var(--fs-text-2)', maxWidth: 560, margin: '16px auto 0', lineHeight: 1.6 }}>
             A unified workflow from evidence collection through blockchain anchoring, designed to withstand legal scrutiny.
           </p>
@@ -173,29 +195,32 @@ export default function LandingPage() {
           {FEATURES.map((f, i) => {
             const Icon = f.icon
             return (
-              <div key={i} className="fs-feature-card">
+              <article key={i} className="fs-feature-card">
                 <div className="fs-feature-icon" style={{ background: f.bg }}>
-                  <Icon size={20} color={f.color} />
+                  <Icon size={20} color={f.color} aria-hidden="true" />
                 </div>
                 <h3 style={{ fontSize: '1.0625rem', fontWeight: 600, marginBottom: 10, letterSpacing: '-0.02em' }}>{f.title}</h3>
                 <p style={{ color: 'var(--fs-text-2)', lineHeight: 1.65, fontSize: '0.875rem' }}>{f.desc}</p>
-              </div>
+              </article>
             )
           })}
         </div>
       </section>
 
-      {/* ── Trust Signal ────────────────────────────────────────── */}
-      <section style={{
-        padding: '80px 40px',
-        borderTop: '1px solid var(--fs-border)',
-        borderBottom: '1px solid var(--fs-border)',
-        background: 'var(--fs-surface)',
-      }}>
+      {/* ── Trust Signal ─────────────────────────────────────────── */}
+      <section
+        aria-labelledby="trust-heading"
+        style={{
+          padding: '80px 40px',
+          borderTop: '1px solid var(--fs-border)',
+          borderBottom: '1px solid var(--fs-border)',
+          background: 'var(--fs-surface)',
+        }}
+      >
         <div style={{ maxWidth: 1000, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'center' }}>
           <div>
             <div className="fs-label" style={{ marginBottom: 16 }}>Forensic Standards</div>
-            <h2 className="fs-h2" style={{ marginBottom: 16 }}>Evidence that holds up.</h2>
+            <h2 id="trust-heading" className="fs-h2" style={{ marginBottom: 16 }}>Evidence that holds up.</h2>
             <p style={{ color: 'var(--fs-text-2)', lineHeight: 1.7, marginBottom: 32 }}>
               FiduScan is engineered for investigations where the integrity of digital evidence is non-negotiable.
               Every operation is logged, every hash is anchored, every audit trail is preserved.
@@ -204,9 +229,9 @@ export default function LandingPage() {
               Open Investigation <ChevronRight size={14} />
             </Link>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <ul style={{ display: 'flex', flexDirection: 'column', gap: 12, listStyle: 'none' }}>
             {TRUST.map((item, i) => (
-              <div key={i} style={{
+              <li key={i} style={{
                 display: 'flex', alignItems: 'center', gap: 12,
                 padding: '14px 18px',
                 background: 'var(--fs-panel)',
@@ -218,18 +243,18 @@ export default function LandingPage() {
                   background: 'var(--fs-verified-dim)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
                 }}>
-                  <Check size={12} color="var(--fs-verified)" />
+                  <Check size={12} color="var(--fs-verified)" aria-hidden="true" />
                 </div>
                 <span style={{ fontSize: '0.875rem', color: 'var(--fs-text-1)' }}>{item}</span>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       </section>
 
       {/* ── CTA ─────────────────────────────────────────────────── */}
-      <section style={{ padding: '120px 40px', textAlign: 'center' }}>
-        <h2 className="fs-h2" style={{ marginBottom: 16 }}>Ready to investigate?</h2>
+      <section aria-labelledby="cta-heading" style={{ padding: '120px 40px', textAlign: 'center' }}>
+        <h2 id="cta-heading" className="fs-h2" style={{ marginBottom: 16 }}>Ready to investigate?</h2>
         <p style={{ color: 'var(--fs-text-2)', marginBottom: 40, fontSize: '1rem' }}>
           Open your first investigation. No setup required.
         </p>
@@ -245,10 +270,10 @@ export default function LandingPage() {
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       }}>
         <span style={{ fontSize: '0.8125rem', color: 'var(--fs-text-3)' }}>© 2025 FiduScan. Forensic Intelligence Platform.</span>
-        <div style={{ display: 'flex', gap: 20 }}>
+        <nav aria-label="Footer navigation" style={{ display: 'flex', gap: 20 }}>
           <Link href="/developer" style={{ fontSize: '0.8125rem', color: 'var(--fs-text-3)', textDecoration: 'none' }}>API</Link>
           <Link href="/settings" style={{ fontSize: '0.8125rem', color: 'var(--fs-text-3)', textDecoration: 'none' }}>Privacy</Link>
-        </div>
+        </nav>
       </footer>
     </div>
   )

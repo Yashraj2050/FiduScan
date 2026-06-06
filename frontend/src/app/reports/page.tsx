@@ -1,6 +1,10 @@
-'use client'
-
+import type { Metadata } from 'next'
 import { FileText, Download, ExternalLink, Link2, Shield, Filter } from 'lucide-react'
+
+export const metadata: Metadata = {
+  title: 'Report Center',
+  description: 'Authenticity reports for all analyzed evidence. Download as PDF or JSON for legal use.',
+}
 
 const REPORTS = [
   { id: 'RPT-2241', case: 'INV-0047', file: 'press_conference_photo.jpg', type: 'Image', score: 0.97, status: 'verified', anchored: true, created: '4m ago', size: '48 KB' },

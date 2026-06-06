@@ -1,5 +1,4 @@
 'use client'
-
 import { useState } from 'react'
 import { Upload, Droplets, CheckCircle2, XCircle, AlertTriangle, ImageIcon, Music, Video, Shield } from 'lucide-react'
 
@@ -175,4 +174,3 @@ export default function WatermarkPage() {
     </div>
   )
 }
-
