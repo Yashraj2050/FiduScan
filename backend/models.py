@@ -133,3 +133,6 @@ class DeveloperApiKey(Base):
 # SSO models imported to ensure table creation
 from sso_models import IdentityProvider, SSOSession, SAMLReplayCache, OIDCState  # noqa: F401
 # Add back-reference to Organization
+
+# Audit models imported to ensure table creation
+from audit_models import EnterpriseAuditLog, OrgAuditConfig  # noqa: F401
