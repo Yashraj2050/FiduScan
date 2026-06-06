@@ -50,6 +50,7 @@ class Organization(Base):
 
     members = relationship("OrganizationMember", back_populates="organization")
     workspaces = relationship("Workspace", back_populates="organization")
+    identity_providers = relationship("IdentityProvider", back_populates="organization")
 
 class OrganizationMember(Base):
     __tablename__ = "organization_members"
@@ -128,3 +129,7 @@ class DeveloperApiKey(Base):
     revoked = Column(Integer, default=0)
 
     user = relationship("User")
+
+# SSO models imported to ensure table creation
+from sso_models import IdentityProvider, SSOSession, SAMLReplayCache, OIDCState  # noqa: F401
+# Add back-reference to Organization
