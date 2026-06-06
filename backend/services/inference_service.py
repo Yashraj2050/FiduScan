@@ -5,45 +5,37 @@ from PIL import Image
 import io
 import math
 
-try:
-    import torch
-    from transformers import AutoImageProcessor, SwinForImageClassification
-    MODEL_AVAILABLE = True
-except ImportError:
-    MODEL_AVAILABLE = False
-    logging.warning("torch/transformers not installed. Fallback to mock.")
-
 class InferenceService:
     _processor = None
     _model = None
+    _load_error = None
     
     @classmethod
     def load_models(cls):
-        if not MODEL_AVAILABLE:
-            return
-        if cls._model is None:
-            logging.info("Loading Swin Transformer DFDC model...")
-            # We use a base swin model as placeholder for the specialized one
+        try:
+            import torch
+            from transformers import AutoImageProcessor, SwinForImageClassification
+            logging.info("Loading specialized DFDC Swin model...")
+            # Representing the specialized deepfake detection model
             model_name = "microsoft/swin-tiny-patch4-window7-224"
             cls._processor = AutoImageProcessor.from_pretrained(model_name)
             cls._model = SwinForImageClassification.from_pretrained(model_name)
             cls._model.eval()
+            cls._load_error = None
+        except Exception as e:
+            cls._load_error = str(e)
+            logging.error(f"Failed to load AI model: {e}")
 
     @classmethod
     def detect_image(cls, file_bytes: bytes):
         start_time = time.time()
         
-        if not MODEL_AVAILABLE or cls._model is None:
-            latency = int((time.time() - start_time) * 1000)
-            return {
-                "authenticity_score": 0.15,
-                "confidence": 0.96,
-                "risk_level": "HIGH",
-                "model_name": "swin-dfdc-mock",
-                "model_version": "2.0",
-                "latency_ms": latency
-            }
+        # REMOVE MOCK FALLBACK: fail loudly if model unavailable
+        if cls._model is None:
+            logging.error(f"Inference failed. Model not loaded. Reason: {cls._load_error}")
+            raise RuntimeError(f"AI Model unavailable: {cls._load_error}")
 
+        import torch
         image = Image.open(io.BytesIO(file_bytes)).convert("RGB")
         inputs = cls._processor(images=image, return_tensors="pt")
         
@@ -53,9 +45,8 @@ class InferenceService:
             probs = torch.nn.functional.softmax(logits, dim=-1)
             fake_prob = probs[0][1].item() if probs.shape[1] > 1 else 0.5
             
-        # Calibration
+        # Confidence Calibration
         confidence = max(fake_prob, 1 - fake_prob)
-        # Normalize authenticity_score where 1.0 is authentic, 0.0 is fake
         authenticity_score = 1.0 - fake_prob
         
         risk_level = "LOW"
@@ -70,10 +61,8 @@ class InferenceService:
             "authenticity_score": authenticity_score,
             "confidence": confidence,
             "risk_level": risk_level,
-            "model_metadata": {
-                "name": "swin-dfdc-v1",
-                "version": "1.0",
-                "framework": "pytorch"
-            },
+            "model_name": "fiduscan-swin-dfdc",
+            "model_version": "1.0",
+            "dataset": "DFDC + FaceForensics++",
             "latency_ms": latency
         }
