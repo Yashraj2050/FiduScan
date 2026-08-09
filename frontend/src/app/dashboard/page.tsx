@@ -2,22 +2,23 @@
 import Link from 'next/link'
 import {
   FolderOpen, Shield, Link2, Droplets, FileText,
-  TrendingUp, ChevronRight, Clock, CheckCircle2, AlertTriangle, Circle
+  ChevronRight, Clock, AlertTriangle, Fingerprint, Activity,
+  Server, HardDrive
 } from 'lucide-react'
 
 const STATS = [
-  { label: 'Active Cases',    value: '7',    delta: '+2 this week',  color: 'var(--fs-accent)',   icon: FolderOpen },
-  { label: 'Evidence Items',  value: '43',   delta: '+12 this week', color: 'var(--fs-verified)', icon: Shield },
-  { label: 'Anchored Hashes', value: '38',   delta: '88% of items',  color: 'var(--fs-chain)',    icon: Link2 },
-  { label: 'Reports Generated', value: '21', delta: '+5 this week',  color: 'var(--fs-uncertain)',icon: FileText },
+  { label: 'ACTIVE INVESTIGATIONS', value: '7',    meta: 'SYS_NOMINAL', color: 'var(--fs-text-1)',   icon: FolderOpen },
+  { label: 'EVIDENCE ITEMS',        value: '43',   meta: 'VERIFIED_40', color: 'var(--fs-verified)', icon: Shield },
+  { label: 'BLOCKCHAIN ANCHORS',    value: '38',   meta: 'POLYGON_MAIN',color: 'var(--fs-chain)',    icon: Link2 },
+  { label: 'FORENSIC REPORTS',      value: '21',   meta: 'SECURE_STORE',color: 'var(--fs-text-2)',   icon: FileText },
 ]
 
 const ACTIVITY = [
-  { id: 'ev_8821', type: 'Evidence Anchored', case: 'Case #0047 — Sports Media', status: 'verified', time: '4m ago' },
-  { id: 'ev_8820', type: 'Deepfake Detected',  case: 'Case #0046 — Governance',  status: 'tampered', time: '18m ago' },
-  { id: 'ev_8818', type: 'Watermark Verified', case: 'Case #0045 — IP Dispute',  status: 'verified', time: '1h ago' },
-  { id: 'ev_8817', type: 'Case Submitted for Review', case: 'Case #0044 — Insurance', status: 'uncertain', time: '2h ago' },
-  { id: 'ev_8815', type: 'Report Exported',   case: 'Case #0043 — Social Media', status: 'verified', time: '5h ago' },
+  { id: 'EV-8821', type: 'BLOCKCHAIN_ANCHOR_SUCCESS', case: 'INV-0047', status: 'verified', time: '14:32:01' },
+  { id: 'EV-8820', type: 'DEEPFAKE_TAMPER_DETECTED',  case: 'INV-0046', status: 'tampered', time: '14:18:44' },
+  { id: 'EV-8818', type: 'WATERMARK_VERIFIED',        case: 'INV-0045', status: 'verified', time: '13:02:11' },
+  { id: 'EV-8817', type: 'ANALYSIS_PENDING_REVIEW',   case: 'INV-0044', status: 'uncertain',time: '12:04:59' },
+  { id: 'EV-8815', type: 'REPORT_EXPORTED_PDF',       case: 'INV-0043', status: 'verified', time: '09:41:22' },
 ]
 
 const RECENT_CASES = [
@@ -28,79 +29,79 @@ const RECENT_CASES = [
 ]
 
 const STATUS_BADGE: Record<string, { label: string; cls: string }> = {
-  open:      { label: 'Open',      cls: 'fs-badge-accent' },
-  in_review: { label: 'In Review', cls: 'fs-badge-uncertain' },
-  closed:    { label: 'Closed',    cls: 'fs-badge-neutral' },
+  open:      { label: 'OPEN',      cls: 'fs-badge-accent' },
+  in_review: { label: 'REVIEW',    cls: 'fs-badge-uncertain' },
+  closed:    { label: 'CLOSED',    cls: 'fs-badge-neutral' },
 }
 
 const PRIORITY_DOT: Record<string, string> = {
-  critical: '#EF4444',
-  high:     '#F97316',
-  medium:   '#EAB308',
-  low:      '#6B7280',
+  critical: 'var(--fs-tampered)',
+  high:     'var(--fs-uncertain)',
+  medium:   'var(--fs-info)',
+  low:      'var(--fs-text-3)',
 }
 
 export default function DashboardPage() {
   return (
-    <div style={{ padding: '32px', maxWidth: 1400, margin: '0 auto' }}>
+    <div style={{ padding: '40px', maxWidth: 1440, margin: '0 auto' }}>
 
       {/* Header */}
-      <div style={{ marginBottom: 32 }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--fs-text-1)' }}>
-          Command Center
-        </h1>
-        <p style={{ color: 'var(--fs-text-2)', marginTop: 4, fontSize: '0.875rem' }}>
-          Overview of active investigations, evidence status, and platform health.
-        </p>
+      <div style={{ marginBottom: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <div>
+          <div className="fs-label" style={{ marginBottom: 8, display: 'flex', gap: 8, alignItems: 'center' }}>
+            <Activity size={12} color="var(--fs-verified)" />
+            SYSTEM INTELLIGENCE OVERVIEW
+          </div>
+          <h1 className="fs-h1">Command Center</h1>
+        </div>
+        <div className="fs-mono" style={{ fontSize: '0.75rem', color: 'var(--fs-text-3)', textAlign: 'right' }}>
+          <div>LAST_UPDATE: {new Date().toISOString().slice(0, 19).replace('T', ' ')} UTC</div>
+          <div>SERVER: SECURE_CLUSTER_A1</div>
+        </div>
       </div>
 
       {/* Stat Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 28 }} role="region" aria-label="Platform summary statistics">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 1, background: 'var(--fs-border-strong)', marginBottom: 32, border: '1px solid var(--fs-border-strong)' }}>
         {STATS.map((s, i) => {
           const Icon = s.icon
           return (
-            <div key={i} className="fs-stat-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <div key={i} style={{ background: 'var(--fs-panel)', padding: '24px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
                 <span className="fs-label">{s.label}</span>
-                <div style={{
-                  width: 30, height: 30, borderRadius: 8,
-                  background: `${s.color}18`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center'
-                }}>
-                  <Icon size={14} color={s.color} />
-                </div>
+                <Icon size={14} color={s.color} />
               </div>
-              <div className="fs-stat-value" style={{ color: 'var(--fs-text-1)' }}>{s.value}</div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--fs-text-3)', marginTop: 4 }}>{s.delta}</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 12 }}>
+                <span style={{ fontSize: '2.5rem', fontWeight: 400, lineHeight: 1, letterSpacing: '-0.04em', color: 'var(--fs-text-1)' }}>{s.value}</span>
+              </div>
+              <div className="fs-mono" style={{ fontSize: '0.6875rem', color: 'var(--fs-text-3)', marginTop: 12 }}>
+                [{s.meta}]
+              </div>
             </div>
           )
         })}
       </div>
 
       {/* Main grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: 32 }}>
 
         {/* Recent Cases */}
-        <div className="fs-card">
-          <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--fs-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <h3 style={{ fontSize: '0.9375rem', fontWeight: 600, letterSpacing: '-0.02em' }}>Active Investigations</h3>
-              <p style={{ fontSize: '0.75rem', color: 'var(--fs-text-3)', marginTop: 2 }}>Sorted by most recently updated</p>
-            </div>
-            <Link href="/investigations" className="fs-btn fs-btn-ghost fs-btn-sm">
-              View All <ChevronRight size={13} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--fs-border)', paddingBottom: 12 }}>
+            <h3 className="fs-h3">Active Investigations</h3>
+            <Link href="/investigations" className="fs-btn fs-btn-ghost fs-btn-sm" style={{ padding: 0 }}>
+              VIEW ALL <ChevronRight size={14} style={{ marginLeft: 4 }} />
             </Link>
           </div>
 
-            <table className="fs-table" role="table" aria-label="Active investigations">
+          <table className="fs-table" role="table" aria-label="Active investigations">
             <thead>
               <tr role="row">
-                <th role="columnheader" data-sortable aria-sort="none">Case ID</th>
-                <th role="columnheader" data-sortable aria-sort="descending">Title</th>
-                <th role="columnheader">Priority</th>
-                <th role="columnheader">Evidence</th>
-                <th role="columnheader">Status</th>
-                <th role="columnheader" data-sortable aria-sort="none">Updated</th>
+                <th role="columnheader">ID</th>
+                <th role="columnheader">TITLE</th>
+                <th role="columnheader">PRIORITY</th>
+                <th role="columnheader">EVIDENCE</th>
+                <th role="columnheader">STATUS</th>
+                <th role="columnheader" style={{ textAlign: 'right' }}>UPDATED</th>
               </tr>
             </thead>
             <tbody>
@@ -108,21 +109,19 @@ export default function DashboardPage() {
                 const sb = STATUS_BADGE[c.status]
                 return (
                   <tr key={c.id} style={{ cursor: 'pointer' }}>
+                    <td className="fs-mono" style={{ color: 'var(--fs-text-2)' }}>{c.id}</td>
+                    <td style={{ fontWeight: 500 }}>{c.title}</td>
                     <td>
-                      <span className="fs-mono" style={{ color: 'var(--fs-accent-light)' }}>{c.id}</span>
-                    </td>
-                    <td style={{ fontWeight: 500, fontSize: '0.875rem' }}>{c.title}</td>
-                    <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <div style={{ width: 6, height: 6, borderRadius: '50%', background: PRIORITY_DOT[c.priority] }} />
-                        <span style={{ fontSize: '0.75rem', color: 'var(--fs-text-2)', textTransform: 'capitalize' }}>{c.priority}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ width: 6, height: 6, background: PRIORITY_DOT[c.priority] }} />
+                        <span className="fs-mono" style={{ fontSize: '0.6875rem', textTransform: 'uppercase' }}>{c.priority}</span>
                       </div>
                     </td>
-                    <td style={{ color: 'var(--fs-text-2)', fontSize: '0.875rem' }}>{c.evidence}</td>
+                    <td className="fs-mono" style={{ color: 'var(--fs-text-2)' }}>{c.evidence}</td>
                     <td>
                       <span className={`fs-badge ${sb.cls}`}>{sb.label}</span>
                     </td>
-                    <td style={{ color: 'var(--fs-text-3)', fontSize: '0.75rem' }}>{c.updated}</td>
+                    <td className="fs-mono" style={{ color: 'var(--fs-text-3)', textAlign: 'right' }}>{c.updated}</td>
                   </tr>
                 )
               })}
@@ -131,25 +130,27 @@ export default function DashboardPage() {
         </div>
 
         {/* Activity Feed */}
-        <div className="fs-card">
-          <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--fs-border)' }}>
-            <h3 style={{ fontSize: '0.9375rem', fontWeight: 600, letterSpacing: '-0.02em' }}>Activity Feed</h3>
-            <p style={{ fontSize: '0.75rem', color: 'var(--fs-text-3)', marginTop: 2 }}>Live platform events</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--fs-border)', paddingBottom: 12 }}>
+            <h3 className="fs-h3">System Log</h3>
+            <span className="fs-mono" style={{ fontSize: '0.6875rem', color: 'var(--fs-text-3)' }}>LIVE</span>
           </div>
 
-          <div style={{ padding: '12px 0' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 1, background: 'var(--fs-border)' }}>
             {ACTIVITY.map((a, i) => (
-              <div key={i} className="fs-data-row" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 6 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span className={`fs-status-dot ${a.status}`} />
-                    <span style={{ fontSize: '0.8125rem', fontWeight: 500 }}>{a.type}</span>
+              <div key={i} style={{ background: 'var(--fs-panel)', padding: '12px 16px', display: 'flex', gap: 12 }}>
+                <span className={`fs-status-dot ${a.status}`} style={{ marginTop: 6 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                    <span className="fs-mono" style={{ fontSize: '0.6875rem', color: a.status === 'tampered' ? 'var(--fs-tampered)' : 'var(--fs-text-1)' }}>
+                      {a.type}
+                    </span>
+                    <span className="fs-mono" style={{ fontSize: '0.6875rem', color: 'var(--fs-text-3)' }}>{a.time}</span>
                   </div>
-                  <span style={{ fontSize: '0.6875rem', color: 'var(--fs-text-3)' }}>{a.time}</span>
-                </div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--fs-text-2)', paddingLeft: 14 }}>{a.case}</div>
-                <div style={{ fontSize: '0.6875rem', paddingLeft: 14 }}>
-                  <span className="fs-hash">{a.id}</span>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <span className="fs-mono" style={{ fontSize: '0.6875rem', color: 'var(--fs-text-2)', background: 'var(--fs-surface)', padding: '2px 4px', border: '1px solid var(--fs-border)' }}>{a.id}</span>
+                    <span className="fs-mono" style={{ fontSize: '0.6875rem', color: 'var(--fs-text-3)' }}>{a.case}</span>
+                  </div>
                 </div>
               </div>
             ))}
@@ -157,34 +158,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div style={{ marginTop: 20, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
-        {[
-          { href: '/investigations', icon: FolderOpen, label: 'New Investigation', desc: 'Open a new case and begin collecting evidence', color: 'var(--fs-accent)' },
-          { href: '/watermark',      icon: Droplets,   label: 'Embed Watermark',   desc: 'Protect your media assets with a forensic watermark', color: 'var(--fs-verified)' },
-          { href: '/evidence',       icon: Shield,     label: 'Verify Evidence',   desc: 'Check integrity of an existing evidence record', color: 'var(--fs-chain)' },
-        ].map((a, i) => {
-          const Icon = a.icon
-          return (
-            <Link key={i} href={a.href} style={{ textDecoration: 'none' }}>
-              <div className="fs-card fs-card-interactive" style={{ padding: '20px 24px', display: 'flex', gap: 16, alignItems: 'flex-start' }}>
-                <div style={{
-                  width: 36, height: 36, borderRadius: 10,
-                  background: `${a.color}18`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
-                }}>
-                  <Icon size={18} color={a.color} />
-                </div>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: '0.9375rem', marginBottom: 4, color: 'var(--fs-text-1)' }}>{a.label}</div>
-                  <div style={{ fontSize: '0.8125rem', color: 'var(--fs-text-2)', lineHeight: 1.5 }}>{a.desc}</div>
-                </div>
-                <ChevronRight size={16} color="var(--fs-text-3)" style={{ marginLeft: 'auto', flexShrink: 0, marginTop: 2 }} />
-              </div>
-            </Link>
-          )
-        })}
-      </div>
     </div>
   )
 }
