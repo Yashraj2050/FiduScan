@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from backend.evidence_chain import EvidenceChainEngine
+from evidence_chain import EvidenceChainEngine
 from pydantic import BaseModel
 from typing import Dict, Any, List
 

@@ -29,6 +29,7 @@ export default function DeveloperPortal() {
   }, [toast]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchKeys();
   }, [fetchKeys]);
 

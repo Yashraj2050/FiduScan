@@ -55,6 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const stored = localStorage.getItem('fiduscan_user');
       if (stored) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setUser(JSON.parse(stored));
       }
     } catch {

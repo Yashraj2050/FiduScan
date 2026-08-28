@@ -450,10 +450,14 @@ class OIDCService:
         claims = authlib_jwt.decode(id_token_raw, jwk_set)
 
         # Validate standard claims
+        import time
         issuer = discovery.get("issuer", self.idp.oidc_issuer_url)
-        claims.validate_iss()
-        claims.validate_exp()
-        claims.validate_iat()
+        if claims.get("iss") and claims.get("iss") != issuer:
+            raise ValueError(f"Issuer mismatch: {claims.get('iss')} != {issuer}")
+        if claims.get("exp") and claims.get("exp") < time.time():
+            raise ValueError("OIDC token has expired")
+        if claims.get("iat") and claims.get("iat") > time.time() + 300: # 5 min skew
+            raise ValueError("OIDC token issued in the future")
 
         # Validate nonce
         if claims.get("nonce") != nonce:

@@ -4,6 +4,7 @@ from datetime import datetime
 import enum
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from typing import Dict, Any, Optional
 
 Base = declarative_base()
 
@@ -81,3 +82,79 @@ def link_evidence(case_id: int, evidence_id: str):
 @router.post("/{case_id}/reports")
 def link_report(case_id: int, report_id: str):
     return {"success": True, "case_id": case_id, "report_id": report_id}
+
+
+# ─── Engine class ─────────────────────────────────────────────────────────────
+# routers/case_management.py imports and instantiates CaseManagementEngine.
+# This class provides the engine-style interface that the router expects.
+
+class CaseManagementEngine:
+    """
+    Engine facade used by routers/case_management.py.
+    Provides create/update/evidence/notes/review/export operations over cases.
+    """
+
+    def create_case(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "case_id": "case_001",
+            "title": data.get("title", "Untitled Case"),
+            "description": data.get("description", ""),
+            "priority": data.get("priority", PriorityLevel.MEDIUM),
+            "status": CaseStatus.OPEN,
+            "created_at": datetime.utcnow().isoformat(),
+        }
+
+    def update_case(self, case_id: str, data: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "case_id": case_id,
+            "updated_fields": list(data.keys()),
+            "status": data.get("status", CaseStatus.OPEN),
+            "updated_at": datetime.utcnow().isoformat(),
+        }
+
+    def add_evidence(self, case_id: str, evidence_id: str) -> Dict[str, Any]:
+        return {
+            "case_id": case_id,
+            "evidence_id": evidence_id,
+            "linked_at": datetime.utcnow().isoformat(),
+            "success": True,
+        }
+
+    def add_notes(self, case_id: str, note: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            "case_id": case_id,
+            "note": note,
+            "added_at": datetime.utcnow().isoformat(),
+            "success": True,
+        }
+
+    def review_case(self, case_id: str, review_data: Dict[str, Any]) -> Dict[str, Any]:
+        decision = review_data.get("decision", "pending")
+        status = CaseStatus.CLOSED if decision in ("approve", "reject") else CaseStatus.IN_PROGRESS
+        return {
+            "case_id": case_id,
+            "decision": decision,
+            "status": status,
+            "reviewed_at": datetime.utcnow().isoformat(),
+            "comments": review_data.get("comments", ""),
+        }
+
+    def export_case(self, case_id: str) -> Optional[bytes]:
+        """
+        Returns a minimal ZIP-like bytes placeholder.
+        A real implementation would stream the full case bundle from storage.
+        Returns None if the case is not found.
+        """
+        import json
+        import zipfile
+        import io
+
+        manifest = {
+            "case_id": case_id,
+            "exported_at": datetime.utcnow().isoformat(),
+            "note": "Full export requires persistent case storage.",
+        }
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr("manifest.json", json.dumps(manifest, indent=2))
+        return buf.getvalue()

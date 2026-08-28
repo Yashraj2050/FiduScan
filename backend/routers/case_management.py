@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Response
-from backend.case_management import CaseManagementEngine
+from case_management import CaseManagementEngine
 from pydantic import BaseModel
 from typing import Dict, Any
 

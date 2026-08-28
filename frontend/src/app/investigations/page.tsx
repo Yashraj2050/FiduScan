@@ -140,7 +140,7 @@ export default function InvestigationsPage() {
                     {['IMG', 'VID', 'AUD'][i % 3]}_EVIDENCE_{String(i + 1).padStart(3, '0')}
                   </div>
                   <div className="fs-mono" style={{ fontSize: '0.6875rem', color: 'var(--fs-text-2)', marginBottom: 16, background: 'var(--fs-bg)', padding: '4px 8px', border: '1px solid var(--fs-border)' }}>
-                    SHA: a{Math.random().toString(16).slice(2, 38)}
+                    SHA: a{(i * 987654321).toString(16).padEnd(36, '0')}
                   </div>
                   <div style={{ display: 'flex', gap: 12, alignItems: 'center', borderTop: '1px solid var(--fs-border)', paddingTop: 16 }}>
                     <span className={`fs-mono`} style={{ fontSize: '0.6875rem', color: i % 3 === 1 ? 'var(--fs-tampered)' : 'var(--fs-verified)' }}>

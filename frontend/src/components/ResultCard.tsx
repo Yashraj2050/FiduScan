@@ -1,295 +1,188 @@
 'use client';
 
+import { TrustAnalysisResponse } from '@/types';
+import { ShieldAlert, ShieldCheck, Activity, Database, Key, Server, BrainCircuit, ShieldBan, Shield, XCircle, CheckCircle2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { DetectionResult } from '@/types';
-import { formatConfidence } from '@/lib/api';
-import { ShieldCheck, ShieldAlert, Cpu, Clock, Hash, AlertTriangle, Shield, AlertOctagon, Download } from 'lucide-react';
 
-interface ResultCardProps {
-  result: DetectionResult;
-}
+export default function ResultCard({ result }: { result: TrustAnalysisResponse }) {
+  const [scoreDisplay, setScoreDisplay] = useState(0);
 
-export default function ResultCard({ result }: ResultCardProps) {
-  const isAI = result.prediction === 'AI_GENERATED';
-  const confidencePct = result.confidence * 100;
-  
-  // Animation state for gauge
-  const [animatedPct, setAnimatedPct] = useState(0);
   useEffect(() => {
-    const timer = setTimeout(() => setAnimatedPct(confidencePct), 100);
-    return () => clearTimeout(timer);
-  }, [confidencePct]);
+    // Count up animation for score
+    const target = result.risk.score;
+    const duration = 1000;
+    const steps = 30;
+    const stepTime = duration / steps;
+    const increment = target / steps;
+    let current = 0;
 
-  // Risk calculation based on AI probability
-  const aiProb = result.ai_probability;
-  let riskLevel = 'Low Risk';
-  let RiskIcon = ShieldCheck;
-  let riskColor = 'text-emerald-400';
-  let riskBg = 'bg-emerald-500/10 border-emerald-500/20';
-  let riskWidth = 'w-1/3';
-  let riskIndicatorColor = 'bg-emerald-500';
+    const timer = setInterval(() => {
+      current += increment;
+      if (current >= target) {
+        setScoreDisplay(target);
+        clearInterval(timer);
+      } else {
+        setScoreDisplay(Math.round(current));
+      }
+    }, stepTime);
 
-  if (aiProb >= 0.8) {
-    riskLevel = 'High Risk';
-    RiskIcon = AlertOctagon;
-    riskColor = 'text-red-400';
-    riskBg = 'bg-red-500/10 border-red-500/20';
-    riskWidth = 'w-full';
-    riskIndicatorColor = 'bg-red-500';
-  } else if (aiProb >= 0.4) {
-    riskLevel = 'Medium Risk';
-    RiskIcon = AlertTriangle;
-    riskColor = 'text-amber-400';
-    riskBg = 'bg-amber-500/10 border-amber-500/20';
-    riskWidth = 'w-2/3';
-    riskIndicatorColor = 'bg-amber-500';
-  }
+    return () => clearInterval(timer);
+  }, [result.risk.score]);
 
-  // Gauge parameters
-  const radius = 36;
-  const circumference = Math.PI * radius;
-  const strokeDashoffset = circumference - (animatedPct / 100) * circumference;
+  const riskLevel = result.risk.level;
+  const isHighRisk = riskLevel === 'HIGH' || riskLevel === 'CRITICAL';
+  
+  const riskColor = riskLevel === 'LOW' ? 'text-emerald-400' : 
+                    riskLevel === 'MEDIUM' ? 'text-amber-400' : 
+                    riskLevel === 'HIGH' ? 'text-orange-500' : 'text-red-500';
 
-  const handleExport = () => {
-    const exportData = {
-      timestamp: new Date().toISOString(),
-      prediction: result.prediction,
-      confidence_score: result.confidence,
-      ai_probability: result.ai_probability,
-      authentic_probability: result.authentic_probability,
-      analysis_metadata: result.metadata,
-      inference_time_ms: result.inference_time_ms,
-      request_id: result.request_id,
-      model_version: result.model_version
-    };
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `fiduscan-report-${result.request_id}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
+  const riskBg = riskLevel === 'LOW' ? 'bg-emerald-500' : 
+                 riskLevel === 'MEDIUM' ? 'bg-amber-400' : 
+                 riskLevel === 'HIGH' ? 'bg-orange-500' : 'bg-red-500';
+
+  const agentAvailable = result.agent?.status === 'AVAILABLE' || !!result.agent?.assessment;
+  const conflictOccurred = agentAvailable && result.agent?.recommended_action !== result.decision.action;
 
   return (
-    <div className={`glass-card p-6 animate-fade-in ${isAI ? 'glow-ai' : 'glow-authentic'}`}>
-      {/* ── Header with Gauge ─────────────────────────────────────────── */}
-      <div className="flex items-start justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <div className="relative flex items-center justify-center">
-            {/* SVG Semi-circle Gauge */}
-            <svg className="w-24 h-16 transform rotate-180" viewBox="0 0 100 50">
-              {/* Background track */}
-              <path
-                d="M 10 50 A 40 40 0 0 1 90 50"
-                fill="none"
-                stroke="rgba(255,255,255,0.1)"
-                strokeWidth="8"
-                strokeLinecap="round"
-              />
-              {/* Foreground progress */}
-              <path
-                d="M 10 50 A 40 40 0 0 1 90 50"
-                fill="none"
-                stroke={isAI ? '#f87171' : '#34d399'}
-                strokeWidth="8"
-                strokeLinecap="round"
-                strokeDasharray={circumference}
-                strokeDashoffset={strokeDashoffset}
-                className="transition-all duration-1000 ease-out"
-              />
-            </svg>
-            <div className="absolute top-8 flex flex-col items-center">
-              <span className="text-xl font-bold text-white/95">
-                {Math.round(animatedPct)}%
-              </span>
+    <div className="fs-surface flex flex-col h-full animate-fade-in border border-white/[0.05] shadow-2xl rounded-lg overflow-hidden">
+      
+      {/* Header */}
+      <div className="px-6 py-4 border-b border-white/[0.05] flex justify-between items-center bg-white/[0.01]">
+        <div className="flex items-center gap-2">
+          <Activity size={14} className="text-white/40" />
+          <span className="fs-label tracking-widest text-white/50">ANALYSIS COMPLETE</span>
+        </div>
+        <span className="text-[10px] font-mono text-white/30">{result.analysis_id?.split('-')[0] || 'Unknown ID'}</span>
+      </div>
+
+      <div className="p-6 flex-grow flex flex-col gap-8 overflow-y-auto custom-scrollbar">
+        
+        {/* SCORE & RISK */}
+        <div className="flex flex-col gap-2">
+          <div className="flex justify-between items-end mb-2">
+            <div>
+              <span className="text-5xl font-light tracking-tight font-mono">{scoreDisplay}</span>
+              <span className="text-sm text-white/40 ml-1">/100</span>
+            </div>
+            <div className="text-right">
+              <span className={`text-sm font-bold tracking-wider ${riskColor}`}>{riskLevel} RISK</span>
+            </div>
+          </div>
+          {/* Minimal Risk Gauge */}
+          <div className="w-full h-1 bg-white/10 rounded-full overflow-hidden flex">
+            <div className={`h-full ${riskBg} transition-all duration-1000 ease-out`} style={{ width: `${scoreDisplay}%` }} />
+          </div>
+        </div>
+
+        {/* EVIDENCE SIGNALS (Tabular) */}
+        <div className="flex flex-col gap-3">
+          <span className="fs-label text-white/40 border-b border-white/5 pb-2 mb-1">EVIDENCE SIGNALS</span>
+          
+          <div className="grid grid-cols-2 gap-4">
+            {/* Image Authenticity */}
+            <div className="flex flex-col gap-1 p-3 rounded bg-white/[0.02] border border-white/[0.03]">
+              <span className="text-[10px] text-white/40 uppercase tracking-widest font-medium">Model Inference</span>
+              <div className="flex justify-between items-center mt-1">
+                <span className="text-sm font-mono truncate">{result.evidence.image?.classification || 'Authentic'}</span>
+                <span className={`text-sm font-mono ${
+                  result.evidence.image?.classification === 'authentic' ? 'text-emerald-400' : 'text-red-400'
+                }`}>
+                  {((result.evidence.image?.confidence || 0) * 100).toFixed(1)}%
+                </span>
+              </div>
+            </div>
+
+            {/* Metadata Hash */}
+            <div className="flex flex-col gap-1 p-3 rounded bg-white/[0.02] border border-white/[0.03]">
+              <span className="text-[10px] text-white/40 uppercase tracking-widest font-medium">Format / Size</span>
+              <div className="flex justify-between items-center mt-1">
+                <span className="text-xs font-mono text-white/70">
+                  {result.evidence.metadata.format || 'Unknown'}
+                </span>
+                <span className="text-xs font-mono text-white/50">
+                  {result.evidence.metadata.file_size_bytes ? 
+                    Math.round(result.evidence.metadata.file_size_bytes / 1024) + ' KB' : 'Unknown'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* TRUST AGENT */}
+        {agentAvailable && (
+          <div className="flex flex-col gap-3">
+            <span className="fs-label text-indigo-400 border-b border-white/5 pb-2 mb-1 flex items-center gap-2">
+              <BrainCircuit size={12} /> AI REASONING
+            </span>
+            <div className="p-4 rounded border border-indigo-500/10 bg-indigo-500/5">
+              <p className="text-sm text-white/80 leading-relaxed mb-4 italic">
+                &quot;{result.agent?.assessment}&quot;
+              </p>
+              
+              <div className="flex flex-col gap-1 mb-4 pl-3 border-l-2 border-white/10">
+                {result.agent?.key_factors?.map((factor: string, i: number) => (
+                  <span key={i} className="text-xs text-white/50">• {factor}</span>
+                ))}
+              </div>
+
+              <div className="flex justify-between items-center border-t border-white/5 pt-3 mt-2">
+                <span className="text-[10px] uppercase tracking-wider text-white/40">Agent Recommendation</span>
+                <span className={`text-xs font-medium font-mono ${result.agent?.recommended_action === 'ALLOW' ? 'text-emerald-400' : result.agent?.recommended_action === 'BLOCK' ? 'text-red-400' : 'text-amber-400'}`}>
+                  {result.agent?.recommended_action} ({(result.agent?.confidence || 0 * 100).toFixed(0)}% CONF)
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* SYSTEM DECISION */}
+        <div className="flex flex-col gap-3 mt-2">
+          <span className="fs-label text-white/40 border-b border-white/5 pb-2 mb-1">SYSTEM DECISION</span>
+          <div className={`p-4 rounded flex items-center justify-between border ${
+            result.decision.action === 'ALLOW' ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-400' :
+            result.decision.action === 'BLOCK' ? 'bg-red-500/5 border-red-500/20 text-red-400' :
+            'bg-amber-500/5 border-amber-500/20 text-amber-400'
+          }`}>
+            <div className="flex items-center gap-3">
+              {result.decision.action === 'ALLOW' ? <ShieldCheck size={20} /> : 
+               result.decision.action === 'BLOCK' ? <ShieldBan size={20} /> : 
+               <ShieldAlert size={20} />}
+              <div>
+                <div className="text-lg font-bold tracking-tight">{result.decision.action}</div>
+                <div className="text-xs opacity-70 mt-0.5">{result.decision.requires_human_review ? 'Requires Human Review' : 'Automated Decision'}</div>
+              </div>
             </div>
           </div>
 
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className={isAI ? 'badge-ai-generated' : 'badge-authentic'}>
-                {isAI ? 'AI Generated' : 'Authentic'}
+          {/* Conflict Guardrail Visualization */}
+          {conflictOccurred && (
+            <div className="flex flex-col gap-2 p-3 mt-1 rounded bg-white/[0.02] border border-white/[0.05]">
+              <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1">
+                <ShieldAlert size={12} /> Policy Guardrail Override
               </span>
+              <p className="text-xs text-white/50">
+                Agent suggested <span className="font-mono text-white/70">{result.agent?.recommended_action}</span>, but deterministic policy enforced <span className="font-mono text-white/70">{result.decision.action}</span>.
+              </p>
             </div>
-            <p className="text-sm text-white/40 mt-1">Confidence Score</p>
-          </div>
-        </div>
-        
-        <div
-          className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
-            isAI
-              ? 'bg-red-500/15 border border-red-500/25'
-              : 'bg-emerald-500/15 border border-emerald-500/25'
-          }`}
-        >
-          {isAI ? (
-            <ShieldAlert size={24} className="text-red-400" />
-          ) : (
-            <ShieldCheck size={24} className="text-emerald-400" />
           )}
         </div>
+
       </div>
 
-      {/* ── Risk Meter ─────────────────────────────────────────────── */}
-      <div className={`rounded-xl border p-4 mb-6 ${riskBg} flex items-center justify-between`}>
+      {/* Audit Footer */}
+      <div className="p-4 border-t border-white/[0.05] bg-black/40 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <RiskIcon size={20} className={riskColor} />
-          <div>
-            <p className={`text-sm font-bold ${riskColor}`}>{riskLevel}</p>
-            <p className="text-xs text-white/50 mt-0.5">Assessed forgery risk</p>
+          <div className="flex gap-1">
+            <CheckCircle2 size={12} className="text-emerald-500" />
+            <Key size={12} className="text-emerald-500" />
           </div>
+          <span className="text-[10px] text-white/40 uppercase tracking-widest font-medium">Immutable Ledger</span>
         </div>
-        <div className="w-24 h-2 bg-white/10 rounded-full overflow-hidden flex">
-          <div className={`h-full ${riskWidth} ${riskIndicatorColor} transition-all duration-700`} />
-        </div>
-      </div>
-
-      {/* ── Confidence Bars ────────────────────────────────────────── */}
-      <div className="space-y-3 mb-6">
-        {/* Authentic */}
-        <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs font-medium text-white/50">Authentic Probability</span>
-            <span className="mono text-emerald-400">
-              {formatConfidence(result.authentic_probability)}
-            </span>
-          </div>
-          <div className="confidence-track bg-white/5 h-1.5 rounded-full overflow-hidden">
-            <div
-              className="confidence-fill-authentic bg-emerald-400 h-full transition-all duration-1000 ease-out"
-              style={{ width: `${result.authentic_probability * 100}%` }}
-            />
-          </div>
-        </div>
-
-        {/* AI Generated */}
-        <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs font-medium text-white/50">AI-Generated Probability</span>
-            <span className="mono text-red-400">
-              {formatConfidence(result.ai_probability)}
-            </span>
-          </div>
-          <div className="confidence-track bg-white/5 h-1.5 rounded-full overflow-hidden">
-            <div
-              className="confidence-fill-ai bg-red-400 h-full transition-all duration-1000 ease-out"
-              style={{ width: `${result.ai_probability * 100}%` }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* C3: Audio Visualization */}
-      {result.metadata && Object.keys(result.metadata).includes('spectrogram_analysis') && (
-        <div className="mb-6 p-4 rounded-xl bg-white/5 border border-white/10">
-          <p className="text-sm font-bold text-white mb-3 flex items-center gap-2">
-            <Clock size={16} className="text-indigo-400" />
-            Audio Spectrogram Analysis
-          </p>
-          <div className="flex items-end h-16 gap-1 w-full opacity-80">
-            {[...Array(30)].map((_, i) => (
-              <div 
-                key={i} 
-                className="flex-1 bg-indigo-500 rounded-t-sm" 
-                style={{ height: `${Math.random() * 100}%`, animationDelay: `${i * 0.05}s` }}
-              ></div>
-            ))}
-          </div>
-          <div className="mt-3 text-xs text-white/50 flex justify-between">
-            <span>0:00</span>
-            <span>Risk Indicator: {aiProb > 0.5 ? 'High synthetic signatures' : 'Natural frequency response'}</span>
-          </div>
-        </div>
-      )}
-
-      {/* C3: Video Visualization */}
-      {result.metadata && Object.keys(result.metadata).includes('Frame Score') && (
-        <div className="mb-6 space-y-4">
-          <p className="text-sm font-bold text-white flex items-center gap-2">
-            <Cpu size={16} className="text-indigo-400" />
-            Video Forensic Breakdown
-          </p>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="p-3 rounded-lg bg-white/5 border border-white/10">
-              <p className="text-xs text-white/50 mb-1">Frame Confidence</p>
-              <p className="text-sm font-mono text-white/90">{(result.metadata as any)['Frame Score']}</p>
-            </div>
-            <div className="p-3 rounded-lg bg-white/5 border border-white/10">
-              <p className="text-xs text-white/50 mb-1">Temporal Consistency</p>
-              <p className="text-sm font-mono text-white/90">{(result.metadata as any)['Temporal Score']}</p>
-            </div>
-            <div className="p-3 rounded-lg bg-white/5 border border-white/10">
-              <p className="text-xs text-white/50 mb-1">Audio Track</p>
-              <p className="text-sm font-mono text-white/90">{(result.metadata as any)['Audio Score']}</p>
-            </div>
-            <div className="p-3 rounded-lg bg-white/5 border border-white/10">
-              <p className="text-xs text-white/50 mb-1">Metadata Risk</p>
-              <p className="text-sm font-mono text-white/90">{(result.metadata as any)['Metadata Score']}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Divider ────────────────────────────────────────────────── */}
-      <div className="border-t border-white/05 mb-5" />
-
-      {/* ── Stats Grid ────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <StatTile
-          icon={<Clock size={14} className="text-white/40" />}
-          label="Inference"
-          value={`${result.inference_time_ms.toFixed(0)}ms`}
-        />
-        <StatTile
-          icon={<Cpu size={14} className="text-white/40" />}
-          label="Model"
-          value="EfficientNet-B0"
-          small
-        />
-        <StatTile
-          icon={<Hash size={14} className="text-white/40" />}
-          label="Request ID"
-          value={result.request_id.slice(0, 8) + '…'}
-          small
-        />
-      </div>
-
-      <button 
-        onClick={handleExport}
-        className="mt-6 w-full flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white py-2.5 rounded-xl font-medium transition-colors text-sm"
-      >
-        <Download size={16} className="text-white/60" />
-        Export Forensic Report
-      </button>
-    </div>
-  );
-}
-
-function StatTile({
-  icon,
-  label,
-  value,
-  small = false,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  small?: boolean;
-}) {
-  return (
-    <div className="rounded-xl bg-white/[0.03] border border-white/[0.05] px-3 py-3 hover:bg-white/[0.05] transition-colors">
-      <div className="flex items-center gap-1.5 mb-1.5">
-        {icon}
-        <span className="text-[10px] text-white/35 uppercase tracking-wider font-semibold">
-          {label}
+        <span className="text-[10px] font-mono text-white/30 bg-white/5 px-2 py-1 rounded truncate max-w-[120px]">
+          {result.audit.audit_id}
         </span>
       </div>
-      <p className={`font-mono font-medium text-white/80 truncate ${small ? 'text-[11px]' : 'text-sm'}`}>
-        {value}
-      </p>
+
     </div>
   );
 }

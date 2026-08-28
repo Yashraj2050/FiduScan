@@ -1,5 +1,49 @@
 // FiduScan API types
 
+export interface TrustRisk {
+  score: number;
+  level: string;
+  reasons: string[];
+}
+
+export interface TrustEvidenceImage {
+  classification: string;
+  confidence: number;
+  model: string;
+}
+
+export interface TrustEvidence {
+  image?: TrustEvidenceImage;
+  metadata: Record<string, any>;
+}
+
+export interface TrustDecision {
+  action: string;
+  requires_human_review: boolean;
+}
+
+export interface TrustAudit {
+  audit_id: string;
+}
+
+export interface AgentResult {
+  status: 'AVAILABLE' | 'UNAVAILABLE';
+  assessment: string | null;
+  key_factors: string[] | null;
+  recommended_action: string | null;
+  human_review_required: boolean | null;
+  confidence: number | null;
+}
+
+export interface TrustAnalysisResponse {
+  analysis_id: string;
+  case_id?: string;
+  risk: TrustRisk;
+  evidence: TrustEvidence;
+  decision: TrustDecision;
+  audit: TrustAudit;
+  agent?: AgentResult;
+}
 export type Prediction = 'AI_GENERATED' | 'AUTHENTIC';
 
 export interface DetectionResult {

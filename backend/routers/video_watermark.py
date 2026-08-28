@@ -1,7 +1,7 @@
 from fastapi import APIRouter, File, UploadFile
-from backend.video_watermark import VideoWatermarkEngine
+from video_watermark import VideoWatermarkEngine
 from pydantic import BaseModel
-from backend.reports import ReportGenerator
+from reports import ReportGenerator
 from typing import Dict
 
 router = APIRouter()

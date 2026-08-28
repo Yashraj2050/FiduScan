@@ -1,4 +1,4 @@
-import { DetectionResult, HealthStatus, AudioDetectionResult, VideoDetectionResult, HistoryPaginatedResponse, ApiKeyCreateResponse, ApiKeyResponse } from '@/types';
+import { DetectionResult, HealthStatus, AudioDetectionResult, VideoDetectionResult, HistoryPaginatedResponse, ApiKeyCreateResponse, ApiKeyResponse, TrustAnalysisResponse } from '@/types';
 import { getToken } from './auth';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -6,6 +6,24 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 function getAuthHeaders(): Record<string, string> {
   const token = getToken();
   return token ? { 'Authorization': `Bearer ${token}` } : {};
+}
+
+export async function analyzeTrust(file: File): Promise<TrustAnalysisResponse> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch(`${API_BASE}/api/v1/trust/analyze`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
+    throw new Error(error.detail || `HTTP ${response.status}`);
+  }
+
+  return response.json();
 }
 
 export async function detectImage(file: File): Promise<DetectionResult> {

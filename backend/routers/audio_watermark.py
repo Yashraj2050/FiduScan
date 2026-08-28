@@ -1,7 +1,7 @@
 from fastapi import APIRouter, File, UploadFile
-from backend.audio_watermark import SpreadSpectrumAudioWatermark
-from backend.routers.watermark import VerificationResponse
-from backend.reports import ReportGenerator
+from audio_watermark import SpreadSpectrumAudioWatermark
+from routers.watermark import VerificationResponse
+from reports import ReportGenerator
 
 router = APIRouter()
 engine = SpreadSpectrumAudioWatermark()

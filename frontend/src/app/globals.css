@@ -96,6 +96,8 @@ html {
 body {
   font-family: var(--font-sans);
   background: var(--fs-bg);
+  background-image: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
+  background-attachment: fixed;
   color: var(--fs-text-1);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
