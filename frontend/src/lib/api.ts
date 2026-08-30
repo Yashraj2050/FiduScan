@@ -1,7 +1,7 @@
 import { DetectionResult, HealthStatus, AudioDetectionResult, VideoDetectionResult, HistoryPaginatedResponse, ApiKeyCreateResponse, ApiKeyResponse, TrustAnalysisResponse } from '@/types';
 import { getToken } from './auth';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 
 function getAuthHeaders(): Record<string, string> {
   const token = getToken();
