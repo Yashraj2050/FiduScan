@@ -13,7 +13,7 @@ class ResourceType(str, enum.Enum):
 class Comment(Base):
     __tablename__ = "comments"
     id = Column(String, primary_key=True)
-    author_id = Column(String, ForeignKey("users.id"))
+    author_id = Column(String, ForeignKey("users.user_id"))
     resource_type = Column(Enum(ResourceType))
     resource_id = Column(String)
     content = Column(Text)
@@ -25,15 +25,15 @@ class Assignment(Base):
     id = Column(String, primary_key=True)
     resource_type = Column(Enum(ResourceType))
     resource_id = Column(String)
-    assignee_id = Column(String, ForeignKey("users.id"))
-    assigner_id = Column(String, ForeignKey("users.id"))
+    assignee_id = Column(String, ForeignKey("users.user_id"))
+    assigner_id = Column(String, ForeignKey("users.user_id"))
     due_date = Column(DateTime)
     status = Column(String, default="pending")
 
 class Notification(Base):
     __tablename__ = "notifications"
     id = Column(String, primary_key=True)
-    user_id = Column(String, ForeignKey("users.id"))
+    user_id = Column(String, ForeignKey("users.user_id"))
     type = Column(String) # mention, assignment, system
     message = Column(String)
     read = Column(String, default="false")

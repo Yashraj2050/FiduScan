@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from backend.case_management import router
+from case_management import router
 
 app = FastAPI()
 app.include_router(router)

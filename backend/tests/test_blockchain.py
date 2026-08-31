@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from backend.blockchain import router
+from blockchain import router
 
 app = FastAPI()
 app.include_router(router)

@@ -1,5 +1,5 @@
 import pytest
-from backend.watermark import DCTWatermarkEngine
+from watermark import DCTWatermarkEngine
 
 def test_watermark_embed_extract():
     engine = DCTWatermarkEngine()

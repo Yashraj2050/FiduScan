@@ -6,7 +6,7 @@ from datetime import datetime
 class OrgBranding(Base):
     __tablename__ = "org_branding"
     id = Column(String, primary_key=True)
-    org_id = Column(String, ForeignKey("organizations.id"))
+    org_id = Column(String, ForeignKey("organizations.org_id"))
     logo_url = Column(String)
     favicon_url = Column(String)
     primary_color = Column(String)
@@ -20,7 +20,7 @@ class OrgBranding(Base):
 class OrgDomain(Base):
     __tablename__ = "org_domains"
     id = Column(String, primary_key=True)
-    org_id = Column(String, ForeignKey("organizations.id"))
+    org_id = Column(String, ForeignKey("organizations.org_id"))
     domain = Column(String, unique=True)
     is_verified = Column(Boolean, default=False)
     ssl_status = Column(String, default="pending")

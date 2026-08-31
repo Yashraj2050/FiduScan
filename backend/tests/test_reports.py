@@ -1,5 +1,5 @@
 import pytest
-from backend.reports import ReportGenerator
+from reports import ReportGenerator
 
 def test_generate_and_verify_valid_report():
     gen = ReportGenerator()

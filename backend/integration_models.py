@@ -11,7 +11,7 @@ class IntegrationType(str, enum.Enum):
 class OrganizationIntegration(Base):
     __tablename__ = "organization_integrations"
     id = Column(String, primary_key=True)
-    org_id = Column(String, ForeignKey("organizations.id"))
+    org_id = Column(String, ForeignKey("organizations.org_id"))
     integration_type = Column(Enum(IntegrationType))
     workspace_id = Column(String) # tenant or workspace
     webhook_url = Column(String)
@@ -24,5 +24,5 @@ class OrganizationIntegration(Base):
 class UserNotificationPreference(Base):
     __tablename__ = "user_notification_preferences"
     id = Column(String, primary_key=True)
-    user_id = Column(String, ForeignKey("users.id"))
+    user_id = Column(String, ForeignKey("users.user_id"))
     preferences = Column(JSON, default=dict) # e.g. {"evidence_created": True, "mentions": True}

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from backend.developer_portal import router
+from developer_portal import router
 
 app = FastAPI()
 app.include_router(router)

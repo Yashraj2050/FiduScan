@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from backend.audio_watermark import router
+from audio_watermark import router
 
 app = FastAPI()
 app.include_router(router)

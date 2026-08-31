@@ -150,3 +150,4 @@ from sso_models import IdentityProvider, SSOSession, SAMLReplayCache, OIDCState 
 
 # Audit models imported to ensure table creation
 from audit_models import EnterpriseAuditLog, OrgAuditConfig  # noqa: F401
+
