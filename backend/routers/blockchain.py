@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from backend.blockchain import BlockchainAnchorEngine
+from blockchain import BlockchainAnchorEngine
 from pydantic import BaseModel
 from typing import Dict, Any
 

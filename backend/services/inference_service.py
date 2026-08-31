@@ -4,6 +4,8 @@ import logging
 from PIL import Image
 import io
 import math
+import torch
+from transformers import AutoImageProcessor, SwinForImageClassification
 
 class InferenceService:
     _processor = None
@@ -13,10 +15,7 @@ class InferenceService:
     @classmethod
     def load_models(cls):
         try:
-            import torch
-            from transformers import AutoImageProcessor, SwinForImageClassification
-            logging.info("Loading specialized DFDC Swin model...")
-            # Representing the specialized deepfake detection model
+            logging.info("Loading ImageNet Swin model (placeholder for deepfake detection)...")
             model_name = "microsoft/swin-tiny-patch4-window7-224"
             cls._processor = AutoImageProcessor.from_pretrained(model_name)
             cls._model = SwinForImageClassification.from_pretrained(model_name)
@@ -35,7 +34,6 @@ class InferenceService:
             logging.error(f"Inference failed. Model not loaded. Reason: {cls._load_error}")
             raise RuntimeError(f"AI Model unavailable: {cls._load_error}")
 
-        import torch
         image = Image.open(io.BytesIO(file_bytes)).convert("RGB")
         inputs = cls._processor(images=image, return_tensors="pt")
         
@@ -61,8 +59,8 @@ class InferenceService:
             "authenticity_score": authenticity_score,
             "confidence": confidence,
             "risk_level": risk_level,
-            "model_name": "fiduscan-swin-dfdc",
-            "model_version": "1.0",
-            "dataset": "DFDC + FaceForensics++",
+            "model_name": "microsoft/swin-tiny-patch4-window7-224 (Placeholder)",
+            "model_version": "ImageNet-1K pre-trained",
+            "dataset": "ImageNet (Not a true deepfake model)",
             "latency_ms": latency
         }

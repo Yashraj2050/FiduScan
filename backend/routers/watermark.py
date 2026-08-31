@@ -1,6 +1,6 @@
 from fastapi import APIRouter, File, UploadFile
 from pydantic import BaseModel
-from backend.watermark import DCTWatermarkEngine
+from watermark import DCTWatermarkEngine
 
 router = APIRouter()
 engine = DCTWatermarkEngine()

@@ -9,7 +9,16 @@ from sqlalchemy.orm import Session
 from database import get_db
 from models import User
 
-SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7")
+# JWT_SECRET_KEY is required. The application will refuse to start if it is
+# not configured. There is no fallback — a missing secret is a hard failure.
+_secret = os.environ.get("JWT_SECRET_KEY")
+if not _secret:
+    raise RuntimeError(
+        "JWT_SECRET_KEY environment variable is not set. "
+        "Generate a strong random secret and set it before starting the server. "
+        "Example: JWT_SECRET_KEY=$(python3 -c \"import secrets; print(secrets.token_hex(48))\")"
+    )
+SECRET_KEY: str = _secret
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 

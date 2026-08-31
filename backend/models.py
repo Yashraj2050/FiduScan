@@ -31,6 +31,20 @@ class Scan(Base):
     owner = relationship("User", back_populates="scans")
 
 
+class TrustAnalysisLog(Base):
+    __tablename__ = "trust_analysis_logs"
+
+    id = Column(String, primary_key=True, index=True)
+    case_id = Column(String, nullable=True, index=True)
+    evidence_id = Column(String, nullable=True, index=True)
+    risk_score = Column(Integer, nullable=False)
+    risk_level = Column(String, nullable=False)
+    decision = Column(String, nullable=False)
+    metadata_json = Column(JSON, nullable=True)
+    model_result_json = Column(JSON, nullable=True)
+    timestamp = Column(DateTime(timezone=True), server_default=func.now(), index=True)
+
+
 class AuditLog(Base):
     __tablename__ = "audit_logs"
 

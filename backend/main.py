@@ -17,7 +17,7 @@ from slowapi.middleware import SlowAPIMiddleware
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from routers import detect, health, audio, video, auth, history, apikeys, billing, watermark, reports, audio_watermark, video_watermark, evidence, blockchain, case_management, sso, audit, apidocs, collab, integrations, whitelabel
+from routers import detect, health, audio, video, auth, history, apikeys, billing, watermark, reports, audio_watermark, video_watermark, evidence, blockchain, case_management, sso, audit, apidocs, collab, integrations, whitelabel, trust
 from middleware.rate_limiter import limiter, rate_limit_exceeded_handler
 from database import engine
 import models
@@ -33,22 +33,33 @@ ALLOWED_ORIGINS = os.environ.get(
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("🚀 FiduScan backend starting up...")
-    
+
     models.Base.metadata.create_all(bind=engine)
     logger.info("✅ Database initialized.")
-    
+
+    # ── Image inference (classmethod-based, no instantiation) ──────────────────
     from services.inference_service import InferenceService
-    app.state.inference_service = InferenceService()
-    app.state.inference_service.load_model()
-    
+    try:
+        InferenceService.load_models()
+        logger.info("✅ Image inference model loaded.")
+    except Exception as exc:
+        logger.warning(f"⚠️  Image model load failed (will degrade to 503): {exc}")
+
+    # ── Audio inference (instance-based) ───────────────────────────────────────
     from services.audio_service import AudioInferenceService
-    app.state.audio_service = AudioInferenceService()
-    app.state.audio_service.load_model()
-    
+    audio_svc = AudioInferenceService()
+    try:
+        audio_svc.load_model()
+        logger.info("✅ Audio inference model loaded.")
+    except Exception as exc:
+        logger.warning(f"⚠️  Audio model load failed (will degrade to 503): {exc}")
+    app.state.audio_service = audio_svc
+
+    # ── Video inference (instance-based, no heavy model load at startup) ───────
     from services.video_service import VideoInferenceService
     app.state.video_service = VideoInferenceService(app.state)
-    
-    logger.info("✅ Models loaded and Grad-CAM initialized.")
+
+    logger.info("✅ Services initialized.")
     yield
     logger.info("🛑 FiduScan backend shutting down.")
 
@@ -117,6 +128,7 @@ app.include_router(video_watermark.router, prefix="/api/v1/video_watermark", tag
 app.include_router(evidence.router, prefix="/api/v1/evidence", tags=["Evidence Chain"])
 app.include_router(blockchain.router, prefix="/api/v1/blockchain", tags=["Blockchain"])
 app.include_router(case_management.router, prefix="/api/v1/cases", tags=["Case Management"])
+app.include_router(trust.router, prefix="/api/v1/trust", tags=["Trust Analysis"])
 
 
 @app.exception_handler(Exception)

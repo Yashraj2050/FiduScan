@@ -5,6 +5,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { AppShell } from '@/components/v6/AppShell'
+import { AuthProvider } from '@/lib/auth-context'
 
 export const metadata: Metadata = {
   title: {
@@ -49,11 +50,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
           rel="stylesheet"
         />
-        <meta name="theme-color" content="#08090C" />
+        <meta name="theme-color" content="#050505" />
         <meta name="color-scheme" content="dark" />
       </head>
       <body style={{ display: 'flex', height: '100vh', overflow: 'hidden', position: 'relative', zIndex: 1 }}>
-        <AppShell>{children}</AppShell>
+        <AuthProvider>
+          <AppShell>{children}</AppShell>
+        </AuthProvider>
       </body>
     </html>
   )

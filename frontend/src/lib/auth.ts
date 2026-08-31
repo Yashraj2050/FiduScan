@@ -18,7 +18,7 @@ export function removeToken() {
 }
 
 export async function login(email: string, password: string) {
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
   
   const formData = new URLSearchParams();
   formData.append('username', email);
@@ -42,7 +42,7 @@ export async function login(email: string, password: string) {
 }
 
 export async function register(email: string, password: string) {
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
   
   const res = await fetch(`${API_BASE}/api/v1/auth/register`, {
     method: 'POST',

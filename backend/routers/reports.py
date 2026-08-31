@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Any
-from backend.reports import ReportGenerator
+from reports import ReportGenerator
 
 router = APIRouter()
 generator = ReportGenerator()

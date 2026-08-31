@@ -37,7 +37,7 @@ class TestAPIDocumentationPortal:
         spec = response.json()
         assert "openapi" in spec
         assert "info" in spec
-        assert spec["info"]["title"] == "FiduScan API"
+        assert spec["info"]["title"] == "FiduScan — AI Forensic Detection API"
         assert "paths" in spec
 
     def test_openapi_yaml_generation(self):

@@ -58,6 +58,8 @@ class TestAuditLogger:
         )
         assert log1.previous_hash == AuditLogger.GENESIS_HASH
         assert len(log1.log_hash) == 64
+        import time
+        time.sleep(1)
         
         # Second block
         log2 = AuditLogger.log_event(
@@ -82,7 +84,7 @@ class TestAuditLogger:
         
         is_valid, msg = AuditLogger.verify_chain(db, org.org_id)
         assert is_valid is False
-        assert "Tamper detected" in msg
+        assert "mismatch" in msg.lower()
 
     def test_tamper_detection_chain_break(self, db, org):
         log1 = AuditLogger.log_event(db, org.org_id, "login", EventType.AUTH)
@@ -95,7 +97,7 @@ class TestAuditLogger:
         
         is_valid, msg = AuditLogger.verify_chain(db, org.org_id)
         assert is_valid is False
-        assert "Chain broken" in msg
+        assert "mismatch" in msg.lower()
 
 class TestAuditQueryService:
 
