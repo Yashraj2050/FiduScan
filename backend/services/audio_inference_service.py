@@ -29,6 +29,10 @@ class AudioInferenceService:
         start_time = time.time()
         
         if cls._model is None:
+            logging.info("Model not loaded yet. Lazy loading...")
+            cls.load_models()
+
+        if cls._model is None:
             raise RuntimeError(f"Audio Model unavailable: {cls._load_error}")
 
         import torch

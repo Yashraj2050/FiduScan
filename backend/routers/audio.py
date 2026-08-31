@@ -4,7 +4,6 @@ from services.audio_inference_service import AudioInferenceService
 import logging
 
 router = APIRouter()
-AudioInferenceService.load_models()
 
 @router.post("/detect")
 async def detect_audio(file: UploadFile = File(...)):

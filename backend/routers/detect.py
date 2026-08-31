@@ -4,7 +4,6 @@ from services.inference_service import InferenceService
 import logging
 
 router = APIRouter()
-InferenceService.load_models()
 
 @router.post("/image")
 async def detect_image(file: UploadFile = File(...)):

@@ -29,9 +29,12 @@ class InferenceService:
     def detect_image(cls, file_bytes: bytes):
         start_time = time.time()
         
-        # REMOVE MOCK FALLBACK: fail loudly if model unavailable
         if cls._model is None:
-            logging.error(f"Inference failed. Model not loaded. Reason: {cls._load_error}")
+            logging.info("Model not loaded yet. Lazy loading...")
+            cls.load_models()
+
+        if cls._model is None:
+            logging.error(f"Inference failed. Model could not be loaded. Reason: {cls._load_error}")
             raise RuntimeError(f"AI Model unavailable: {cls._load_error}")
 
         image = Image.open(io.BytesIO(file_bytes)).convert("RGB")

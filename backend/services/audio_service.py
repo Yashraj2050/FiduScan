@@ -36,7 +36,10 @@ class AudioInferenceService:
 
     def predict(self, audio_bytes: bytes) -> dict:
         if self.model is None:
-            # Fallback mock for MVP if model isn't loaded
+            self.load_model()
+            
+        if self.model is None:
+            # Fallback mock for MVP if model isn't loaded and couldn't be loaded
             return {
                 "prediction": "AI_GENERATED",
                 "confidence": 0.88,

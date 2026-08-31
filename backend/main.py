@@ -37,27 +37,19 @@ async def lifespan(app: FastAPI):
     models.Base.metadata.create_all(bind=engine)
     logger.info("✅ Database initialized.")
 
-    # ── Image inference (classmethod-based, no instantiation) ──────────────────
-    from services.inference_service import InferenceService
-    try:
-        InferenceService.load_models()
-        logger.info("✅ Image inference model loaded.")
-    except Exception as exc:
-        logger.warning(f"⚠️  Image model load failed (will degrade to 503): {exc}")
+    # ── Image inference (lazy-loaded on first request) ──────────────────
+    logger.info("✅ Image inference service registered (lazy loading).")
 
-    # ── Audio inference (instance-based) ───────────────────────────────────────
+    # ── Audio inference (lazy-loaded on first request) ───────────────────────
     from services.audio_service import AudioInferenceService
     audio_svc = AudioInferenceService()
-    try:
-        audio_svc.load_model()
-        logger.info("✅ Audio inference model loaded.")
-    except Exception as exc:
-        logger.warning(f"⚠️  Audio model load failed (will degrade to 503): {exc}")
     app.state.audio_service = audio_svc
+    logger.info("✅ Audio inference service registered (lazy loading).")
 
     # ── Video inference (instance-based, no heavy model load at startup) ───────
     from services.video_service import VideoInferenceService
     app.state.video_service = VideoInferenceService(app.state)
+    logger.info("✅ Video inference service registered.")
 
     logger.info("✅ Services initialized.")
     yield
