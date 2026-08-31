@@ -38,7 +38,7 @@ tqdm==4.66.5
 pyyaml==6.0.2
 
 # SSO / OAuth
-authlib==1.7.2
+authlib==1.3.1
 
 # Email
 resend==2.30.1
