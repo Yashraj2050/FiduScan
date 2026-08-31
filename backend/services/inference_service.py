@@ -4,9 +4,6 @@ import logging
 from PIL import Image
 import io
 import math
-import torch
-from transformers import AutoImageProcessor, SwinForImageClassification
-
 class InferenceService:
     _processor = None
     _model = None
@@ -15,6 +12,8 @@ class InferenceService:
     @classmethod
     def load_models(cls):
         try:
+            import torch
+            from transformers import AutoImageProcessor, SwinForImageClassification
             logging.info("Loading ImageNet Swin model (placeholder for deepfake detection)...")
             model_name = "microsoft/swin-tiny-patch4-window7-224"
             cls._processor = AutoImageProcessor.from_pretrained(model_name)
@@ -37,6 +36,7 @@ class InferenceService:
             logging.error(f"Inference failed. Model could not be loaded. Reason: {cls._load_error}")
             raise RuntimeError(f"AI Model unavailable: {cls._load_error}")
 
+        import torch
         image = Image.open(io.BytesIO(file_bytes)).convert("RGB")
         inputs = cls._processor(images=image, return_tensors="pt")
         

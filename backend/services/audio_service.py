@@ -4,7 +4,6 @@ Loads the selected audio model and runs inference on incoming audio bytes.
 """
 import io
 import time
-import torch
 import numpy as np
 from pathlib import Path
 import sys
@@ -14,18 +13,18 @@ ROOT = Path(__file__).parent.parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from audio_pipeline.preprocess import load_audio, generate_mel_spectrogram
-from audio_pipeline.models import get_audio_model
-
 class AudioInferenceService:
     def __init__(self):
-        self.device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+        self.device = None # Lazy loaded
         self.model = None
         self.model_version = "v1.0.0-MVP"
         self.model_path = ROOT / "models" / "audio" / "Model_B_EfficientNet.pth"
 
     def load_model(self):
         try:
+            import torch
+            from audio_pipeline.models import get_audio_model
+            self.device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
             self.model = get_audio_model("efficientnet_spectrogram", num_classes=2)
             if self.model_path.exists():
                 self.model.load_state_dict(torch.load(self.model_path, map_location="cpu", weights_only=False))
@@ -49,6 +48,9 @@ class AudioInferenceService:
                 "heatmap_b64": None
             }
 
+        import torch
+        from audio_pipeline.preprocess import load_audio, generate_mel_spectrogram
+        
         # 1. Load Audio
         waveform, sr = load_audio(io.BytesIO(audio_bytes))
         
