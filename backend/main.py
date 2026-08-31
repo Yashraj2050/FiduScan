@@ -15,7 +15,6 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from routers import detect, health, audio, video, auth, history, apikeys, billing, watermark, reports, audio_watermark, video_watermark, evidence, blockchain, case_management, sso, audit, apidocs, collab, integrations, whitelabel, trust
 from middleware.rate_limiter import limiter, rate_limit_exceeded_handler

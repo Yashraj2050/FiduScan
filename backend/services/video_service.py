@@ -8,10 +8,7 @@ from pathlib import Path
 import sys
 import numpy as np
 
-# Append root to allow importing video_pipeline
-ROOT = Path(__file__).parent.parent.parent
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+
 
 from video_pipeline.extractor import extract_video_features, analyze_temporal_consistency
 

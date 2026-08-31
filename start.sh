@@ -4,10 +4,12 @@
 set -e
 
 echo "Starting FastAPI backend..."
+cd /app/backend
 export PYTHONPATH=/app/backend
 # Start FastAPI on port 8000 in the background
-python3 -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 &
+python3 -m uvicorn main:app --host 127.0.0.1 --port 8000 &
 FASTAPI_PID=$!
+cd /app
 
 echo "Waiting for FastAPI to initialize..."
 # Wait a few seconds to let models load (if needed) or at least begin initializing

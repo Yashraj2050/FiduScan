@@ -8,17 +8,15 @@ import numpy as np
 from pathlib import Path
 import sys
 
-# Append root to allow importing audio_pipeline
-ROOT = Path(__file__).parent.parent.parent
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+# Base path (backend directory)
+ROOT = Path(__file__).parent.parent
 
 class AudioInferenceService:
     def __init__(self):
         self.device = None # Lazy loaded
         self.model = None
         self.model_version = "v1.0.0-MVP"
-        self.model_path = ROOT / "models" / "audio" / "Model_B_EfficientNet.pth"
+        self.model_path = ROOT / "ml_models" / "audio" / "Model_B_EfficientNet.pth"
 
     def load_model(self):
         try:
