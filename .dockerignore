@@ -17,11 +17,18 @@
 # ─── Large data / model artifacts (not needed in Docker) ─────────────────────
 datasets
 models
+backend/ml_models
 reports
+scratch/
 
-# ─── Logs ─────────────────────────────────────────────────────────────────────
+# ─── Frontend (not needed in backend-only container) ─────────────────────────
+frontend/
+
+# ─── Logs & Local DBs ────────────────────────────────────────────────────────
 logs
 *.log
+*.db
+backend/*.db
 
 # ─── Version control & secrets ────────────────────────────────────────────────
 .git
